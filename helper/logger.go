@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"runtime"
-	"strings"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -101,15 +99,8 @@ func Capture(ctx context.Context, level zapcore.Level, err error, context, scope
 		if errors.Is(err, pgx.ErrNoRows) {
 			return
 		}
-		var (
-			name   string
-			pgxErr *pgconn.PgError
-		)
+		var name string
 		pc, file, line, _ := runtime.Caller(1)
-		if !errors.As(err, &pgxErr) &&
-			!strings.HasSuffix(file, "_query.go") {
-			pc, file, line, _ = runtime.Caller(4)
-		}
 		if fn := runtime.FuncForPC(pc); fn != nil {
 			name = fn.Name()
 		}

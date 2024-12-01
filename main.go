@@ -111,11 +111,45 @@ func main() {
 			}
 		},
 	}
+	cmdSync := &cobra.Command{
+		Use:   "sync",
+		Short: "sync passages from biblegateway.com",
+		Args: func(_ *cobra.Command, args []string) (err error) {
+			return
+		},
+		Run: func(_ *cobra.Command, args []string) {
+			now := time.Now()
+			if err := godotenv.Load(".env"); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrLoad")
+				return
+			}
+			if err := helper.InitHelper(); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrInitHelper")
+				return
+			}
+			service, err := router.MakeHandler(ctx)
+			if err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMakeHandler")
+				return
+			}
+			if err := service.Migration.Migrate(ctx); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
+				return
+			}
+			if err = service.BibleGateway.Sync(ctx); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
+				return
+			}
+			duration := time.Since(now)
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from biblegateway.com successfully in %s", duration.String()), ctxt, "")
+		},
+	}
 	rootCmd := &cobra.Command{Use: config.AppName}
 	rootCmd.AddCommand(
 		cmdVersion,
 		cmdRun,
 		cmdMigration,
+		cmdSync,
 	)
 	rootCmd.SuggestionsMinimumDistance = 1
 	if err := rootCmd.Execute(); err != nil {

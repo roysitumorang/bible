@@ -6,18 +6,20 @@ import (
 	"github.com/roysitumorang/bible/config"
 	"github.com/roysitumorang/bible/helper"
 	"github.com/roysitumorang/bible/migration"
+	"github.com/roysitumorang/bible/services/biblegateway"
 	"go.uber.org/zap"
 )
 
 type (
 	Service struct {
-		Migration *migration.Migration
+		Migration    *migration.Migration
+		BibleGateway *biblegateway.BibleGateway
 	}
 )
 
 func MakeHandler(ctx context.Context) (*Service, error) {
 	ctxt := "Router-MakeHandler"
-	_, err := config.GetDbReadOnly(ctx)
+	dbRead, err := config.GetDbReadOnly(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGetDbReadOnly")
 		return nil, err
@@ -27,13 +29,10 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGetDbWriteOnly")
 		return nil, err
 	}
-	tx, err := dbWrite.Begin(ctx)
-	if err != nil {
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrBegin")
-		return nil, err
-	}
-	migration := migration.NewMigration(tx)
+	migration := migration.New(dbRead, dbWrite)
+	bibleGateway := biblegateway.New(dbRead, dbWrite)
 	return &Service{
-		Migration: migration,
+		Migration:    migration,
+		BibleGateway: bibleGateway,
 	}, nil
 }
