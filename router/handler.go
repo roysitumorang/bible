@@ -6,14 +6,20 @@ import (
 	"github.com/roysitumorang/bible/config"
 	"github.com/roysitumorang/bible/helper"
 	"github.com/roysitumorang/bible/migration"
+	languageQuery "github.com/roysitumorang/bible/modules/language/query"
+	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
+	versionQuery "github.com/roysitumorang/bible/modules/version/query"
+	versionUseCase "github.com/roysitumorang/bible/modules/version/usecase"
 	"github.com/roysitumorang/bible/services/biblegateway"
 	"go.uber.org/zap"
 )
 
 type (
 	Service struct {
-		Migration    *migration.Migration
-		BibleGateway *biblegateway.BibleGateway
+		Migration       *migration.Migration
+		BibleGateway    *biblegateway.BibleGateway
+		LanguageUseCase languageUseCase.LanguageUseCase
+		VersionUseCase  versionUseCase.VersionUseCase
 	}
 )
 
@@ -31,8 +37,14 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	}
 	migration := migration.New(dbRead, dbWrite)
 	bibleGateway := biblegateway.New(dbRead, dbWrite)
+	languageQuery := languageQuery.New(dbRead, dbWrite)
+	versionQuery := versionQuery.New(dbRead, dbWrite)
+	languageUseCase := languageUseCase.New(languageQuery)
+	versionUseCase := versionUseCase.New(versionQuery)
 	return &Service{
-		Migration:    migration,
-		BibleGateway: bibleGateway,
+		Migration:       migration,
+		BibleGateway:    bibleGateway,
+		LanguageUseCase: languageUseCase,
+		VersionUseCase:  versionUseCase,
 	}, nil
 }

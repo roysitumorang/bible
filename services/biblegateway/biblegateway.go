@@ -155,21 +155,23 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 	})
 	for i, language := range languages {
 		for j, version := range language.Versions {
-			builder.Reset()
+			var builder strings.Builder
 			builder.WriteString(baseURL)
 			builder.WriteString("/versions/")
 			builder.WriteString(version.Slug)
 			builder.WriteString("/#booklist")
-			if statusCode, body, err = fasthttp.Get(nil, builder.String()); err != nil {
+			statusCode, body, err := fasthttp.Get(nil, builder.String())
+			if err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")
-				return
+				return err
 			}
 			if statusCode != fasthttp.StatusOK {
 				return fmt.Errorf("status code error: %d", statusCode)
 			}
-			if doc, err = goquery.NewDocumentFromReader(bytes.NewReader(body)); err != nil {
+			doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
+			if err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrNewDocumentFromReader")
-				return
+				return err
 			}
 			doc.Find("tr.ot-book > td.book-name").Each(func(i int, s *goquery.Selection) {
 				chaptersCount, err := strconv.Atoi(s.Children().Last().Text())
@@ -203,7 +205,6 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 		}
 		languages[i] = language
 	}
-	query := url.Values{}
 	for i, language := range languages {
 		for j, version := range language.Versions {
 			for k, book := range version.Books {
@@ -213,7 +214,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 				}
 				for chunk := range slices.Chunk(chapters, 20) {
 					firstChapter := chunk[0]
-					builder.Reset()
+					var builder strings.Builder
 					builder.WriteString(book.Name)
 					builder.WriteString(" ")
 					builder.WriteString(strconv.Itoa(firstChapter))
@@ -222,20 +223,23 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 						builder.WriteString("-")
 						builder.WriteString(strconv.Itoa(lastChapter))
 					}
+					query := url.Values{}
 					query.Set("search", builder.String())
 					query.Set("version", version.Code)
 					builder.Reset()
 					builder.WriteString(baseURL)
 					builder.WriteString("/passage/?")
 					builder.WriteString(query.Encode())
-					if statusCode, body, err = fasthttp.Get(nil, builder.String()); err != nil {
+					statusCode, body, err := fasthttp.Get(nil, builder.String())
+					if err != nil {
 						helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")
 						return err
 					}
 					if statusCode != fasthttp.StatusOK {
 						return fmt.Errorf("status code error: %d", statusCode)
 					}
-					if doc, err = goquery.NewDocumentFromReader(bytes.NewReader(body)); err != nil {
+					doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
+					if err != nil {
 						helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrNewDocumentFromReader")
 						return err
 					}

@@ -23,6 +23,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/roysitumorang/bible/config"
 	"github.com/roysitumorang/bible/helper"
+	versionPresenter "github.com/roysitumorang/bible/modules/version/presenter"
 	"go.uber.org/zap"
 )
 
@@ -59,6 +60,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 		cors.New(),
 	)
 	v1 := r.Group("/v1")
+	versionPresenter.New(q.VersionUseCase, q.LanguageUseCase).Mount(v1.Group("/versions"))
 	v1.Get("/ping", func(c *fiber.Ctx) error {
 		return helper.NewResponse(
 			fiber.StatusOK,
