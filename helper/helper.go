@@ -53,18 +53,11 @@ var (
 )
 
 func String2ByteSlice(str string) []byte {
-	if str == "" {
-		return nil
-	}
 	return unsafe.Slice(unsafe.StringData(str), len(str))
 }
 
 func ByteSlice2String(bs []byte) string {
-	n := len(bs)
-	if n == 0 {
-		return ""
-	}
-	return unsafe.String(unsafe.SliceData(bs), n)
+	return *(*string)(unsafe.Pointer(&bs))
 }
 
 func EncodeSqIDs(numbers ...uint64) (string, error) {
