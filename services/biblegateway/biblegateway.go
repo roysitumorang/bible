@@ -139,17 +139,19 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 				n := len(parts) - 1
 				versionCode, parts := codeReplacer.Replace(parts[n]), parts[:n]
 				versionName := strings.Join(parts, " ")
-				language.Versions = append(
-					language.Versions,
-					Version{
-						Name: versionName,
-						Code: versionCode,
-						Slug: strings.TrimSuffix(strings.TrimPrefix(versionSlug, "/versions/"), "/#booklist"),
-					},
-				)
+				if versionCode == "KJ21" || versionCode == "ERV" {
+					language.Versions = append(
+						language.Versions,
+						Version{
+							Name: versionName,
+							Code: versionCode,
+							Slug: strings.TrimSuffix(strings.TrimPrefix(versionSlug, "/versions/"), "/#booklist"),
+						},
+					)
+				}
 			}
 		})
-		if len(language.Versions) > 0 {
+		if language.Code == "EN" && len(language.Versions) > 0 {
 			languages = append(languages, language)
 		}
 	})
@@ -249,14 +251,14 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 						chapterNumberRaw := strings.ReplaceAll(s.Find("span.chapternum").Text(), "\u00a0", "")
 						if chapterNumberRaw != "" {
 							if chapterNumber, err = strconv.Atoi(chapterNumberRaw); err != nil {
-								helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrAtoi")
+								helper.Capture(ctx, zap.ErrorLevel, err, ctxt, builder.String())
 								return
 							}
 						}
 						verseNumberRaw := strings.ReplaceAll(s.Find("sup.versenum").Text(), "\u00a0", "")
 						if verseNumberRaw != "" {
 							if verseNumber, err = strconv.Atoi(verseNumberRaw); err != nil {
-								helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrAtoi")
+								helper.Capture(ctx, zap.ErrorLevel, err, ctxt, builder.String())
 								return
 							}
 						}
