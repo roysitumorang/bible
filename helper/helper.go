@@ -50,6 +50,13 @@ var (
 		timeZone, err = time.LoadLocation(location)
 		return
 	})
+	GetEnv = sync.OnceValue(func() string {
+		env := os.Getenv("ENV")
+		if env == "" {
+			env = "development"
+		}
+		return env
+	})
 )
 
 func String2ByteSlice(str string) []byte {
@@ -80,12 +87,4 @@ func GetContext(ctx context.Context, c *fiber.Ctx) context.Context {
 
 func LoadTimeZone() *time.Location {
 	return timeZone
-}
-
-func GetEnv() string {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
-	return env
 }
