@@ -26,7 +26,7 @@ func New(
 func (q *versionUseCase) FindVersions(ctx context.Context, filter *versionModel.Filter) (response []versionModel.Version, err error) {
 	ctxt := "VersionUseCase-FindVersions"
 	if response, err = q.versionQuery.FindVersions(ctx, filter); err != nil {
-		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrScan")
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
 	}
 	return
 }

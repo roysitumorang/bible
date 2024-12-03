@@ -31,9 +31,7 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := context.Background()
 	ctxt := "VersionPresenter-FindVersion"
-	filter := &versionModel.Filter{
-		VersionUID: c.Params("uid"),
-	}
+	filter := versionModel.NewFilter(versionModel.WithVersionUID(c.Params("uid")))
 	response, err := q.versionUseCase.FindVersions(ctx, filter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")

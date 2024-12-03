@@ -9,6 +9,8 @@ type (
 		VersionUID string
 	}
 
+	FilterOption func(q *Filter)
+
 	Version struct {
 		ID          int64     `json:"-"`
 		UID         string    `json:"id"`
@@ -21,11 +23,16 @@ type (
 	}
 )
 
-func NewFilter() *Filter {
-	return &Filter{}
+func NewFilter(options ...FilterOption) *Filter {
+	filter := &Filter{}
+	for _, option := range options {
+		option(filter)
+	}
+	return filter
 }
 
-func (q *Filter) WithVersionUID(versionUID string) *Filter {
-	q.VersionUID = versionUID
-	return q
+func WithVersionUID(versionUID string) FilterOption {
+	return func(q *Filter) {
+		q.VersionUID = versionUID
+	}
 }
