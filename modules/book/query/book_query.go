@@ -43,7 +43,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 			n := len(params)
 			conditions = append(
 				conditions,
-				fmt.Sprintf("version_uid = $%d", n),
+				fmt.Sprintf("b.version_uid = $%d", n),
 			)
 		}
 		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
