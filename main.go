@@ -93,22 +93,23 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMakeHandler")
 				return
 			}
+			var activity string
 			switch args[0] {
 			case "new":
 				if err := service.Migration.CreateMigrationFile(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateMigrationFile")
 					return
 				}
-				duration := time.Since(now)
-				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("creating migration successfully in %s", duration.String()), ctxt, "")
+				activity = "creating"
 			case "run":
 				if err := service.Migration.Migrate(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 					return
 				}
-				duration := time.Since(now)
-				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("running migration successfully in %s", duration.String()), ctxt, "")
+				activity = "running"
 			}
+			duration := time.Since(now)
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%s migration successfully in %s", activity, duration.String()), ctxt, "")
 		},
 	}
 	cmdSync := &cobra.Command{
@@ -143,23 +144,23 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 				return
 			}
+			var domain string
 			switch args[0] {
 			case "biblegateway":
 				if err = service.BibleGateway.Sync(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
 					return
 				}
-				duration := time.Since(now)
-				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from biblegateway.com successfully in %s", duration.String()), ctxt, "")
+				domain = "biblegateway.com"
 			case "alkitabtoba":
 				if err = service.AlkitabToba.Sync(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
 					return
 				}
-				duration := time.Since(now)
-				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from alkitabtoba.wordpress.com successfully in %s", duration.String()), ctxt, "")
+				domain = "alkitabtoba.wordpress.com"
 			}
-
+			duration := time.Since(now)
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from %s successfully in %s", domain, duration.String()), ctxt, "")
 		},
 	}
 	rootCmd := &cobra.Command{Use: config.AppName}
