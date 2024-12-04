@@ -262,7 +262,13 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 								return
 							}
 						}
-						verseBody := strings.TrimPrefix(strip.StripTags(s.Text()), strconv.Itoa(verseNumber))
+						verseBody := strip.StripTags(s.Text())
+						if verseNumber > 1 {
+							verseBody = strings.TrimPrefix(verseBody, strconv.Itoa(verseNumber))
+						} else {
+							verseBody = strings.TrimPrefix(verseBody, strconv.Itoa(chapterNumber))
+						}
+						verseBody = strings.TrimSpace(verseBody)
 						book.Verses = append(
 							book.Verses,
 							Verse{
