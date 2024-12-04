@@ -14,6 +14,7 @@ import (
 	verseUseCase "github.com/roysitumorang/bible/modules/verse/usecase"
 	versionQuery "github.com/roysitumorang/bible/modules/version/query"
 	versionUseCase "github.com/roysitumorang/bible/modules/version/usecase"
+	"github.com/roysitumorang/bible/services/alkitabtoba"
 	"github.com/roysitumorang/bible/services/biblegateway"
 	"go.uber.org/zap"
 )
@@ -22,6 +23,7 @@ type (
 	Service struct {
 		Migration       *migration.Migration
 		BibleGateway    *biblegateway.BibleGateway
+		AlkitabToba     *alkitabtoba.AlkitabToba
 		LanguageUseCase languageUseCase.LanguageUseCase
 		VersionUseCase  versionUseCase.VersionUseCase
 		BookUseCase     bookUseCase.BookUseCase
@@ -43,6 +45,7 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	}
 	migration := migration.New(dbRead, dbWrite)
 	bibleGateway := biblegateway.New(dbRead, dbWrite)
+	alkitabToba := alkitabtoba.New(dbRead, dbWrite)
 	languageQuery := languageQuery.New(dbRead, dbWrite)
 	versionQuery := versionQuery.New(dbRead, dbWrite)
 	bookQuery := bookQuery.New(dbRead, dbWrite)
@@ -54,6 +57,7 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	return &Service{
 		Migration:       migration,
 		BibleGateway:    bibleGateway,
+		AlkitabToba:     alkitabToba,
 		LanguageUseCase: languageUseCase,
 		VersionUseCase:  versionUseCase,
 		BookUseCase:     bookUseCase,

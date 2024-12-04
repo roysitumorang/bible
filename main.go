@@ -112,9 +112,16 @@ func main() {
 		},
 	}
 	cmdSync := &cobra.Command{
-		Use:   "sync",
-		Short: "sync passages from biblegateway.com",
+		Use:   "sync (biblegateway|alkitabtoba)",
+		Short: "sync passages from biblegateway.com/alkitabtoba.wordpress.com",
 		Args: func(_ *cobra.Command, args []string) (err error) {
+			if len(args) == 0 {
+				err = errors.New("requires at least 1 arg (new|run")
+				return
+			}
+			if args[0] != "biblegateway" && args[0] != "alkitabtoba" {
+				err = fmt.Errorf("invalid first flag specified: %s", args[0])
+			}
 			return
 		},
 		Run: func(_ *cobra.Command, args []string) {
@@ -136,12 +143,23 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 				return
 			}
-			if err = service.BibleGateway.Sync(ctx); err != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
-				return
+			switch args[0] {
+			case "biblegateway":
+				if err = service.BibleGateway.Sync(ctx); err != nil {
+					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
+					return
+				}
+				duration := time.Since(now)
+				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from biblegateway.com successfully in %s", duration.String()), ctxt, "")
+			case "alkitabtoba":
+				if err = service.AlkitabToba.Sync(ctx); err != nil {
+					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
+					return
+				}
+				duration := time.Since(now)
+				helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from alkitabtoba.wordpress.com successfully in %s", duration.String()), ctxt, "")
 			}
-			duration := time.Since(now)
-			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from biblegateway.com successfully in %s", duration.String()), ctxt, "")
+
 		},
 	}
 	rootCmd := &cobra.Command{Use: config.AppName}
