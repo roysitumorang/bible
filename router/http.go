@@ -62,7 +62,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 	)
 	v1 := r.Group("/v1")
 	languagePresenter.New(q.LanguageUseCase, q.VersionUseCase).Mount(v1.Group("/languages"))
-	versionPresenter.New(q.VersionUseCase).Mount(v1.Group("/versions"))
+	versionPresenter.New(q.VersionUseCase, q.BookUseCase).Mount(v1.Group("/versions"))
 	v1.Get("/ping", func(c *fiber.Ctx) error {
 		return helper.NewResponse(
 			fiber.StatusOK,

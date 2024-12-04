@@ -101,8 +101,8 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 		}
 	}
 	var builder strings.Builder
-	builder.WriteString(baseURL)
-	builder.WriteString("/versions/")
+	_, _ = builder.WriteString(baseURL)
+	_, _ = builder.WriteString("/versions/")
 	statusCode, body, err := fasthttp.Get(nil, builder.String())
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")
@@ -158,10 +158,10 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 	for i, language := range languages {
 		for j, version := range language.Versions {
 			var builder strings.Builder
-			builder.WriteString(baseURL)
-			builder.WriteString("/versions/")
-			builder.WriteString(version.Slug)
-			builder.WriteString("/#booklist")
+			_, _ = builder.WriteString(baseURL)
+			_, _ = builder.WriteString("/versions/")
+			_, _ = builder.WriteString(version.Slug)
+			_, _ = builder.WriteString("/#booklist")
 			statusCode, body, err := fasthttp.Get(nil, builder.String())
 			if err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")
@@ -217,21 +217,21 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 				for chunk := range slices.Chunk(chapters, 20) {
 					firstChapter := chunk[0]
 					var builder strings.Builder
-					builder.WriteString(book.Name)
-					builder.WriteString(" ")
-					builder.WriteString(strconv.Itoa(firstChapter))
+					_, _ = builder.WriteString(book.Name)
+					_, _ = builder.WriteString(" ")
+					_, _ = builder.WriteString(strconv.Itoa(firstChapter))
 					if n := len(chunk); n > 1 {
 						lastChapter := chunk[n-1]
-						builder.WriteString("-")
-						builder.WriteString(strconv.Itoa(lastChapter))
+						_, _ = builder.WriteString("-")
+						_, _ = builder.WriteString(strconv.Itoa(lastChapter))
 					}
 					query := url.Values{}
 					query.Set("search", builder.String())
 					query.Set("version", version.Code)
 					builder.Reset()
-					builder.WriteString(baseURL)
-					builder.WriteString("/passage/?")
-					builder.WriteString(query.Encode())
+					_, _ = builder.WriteString(baseURL)
+					_, _ = builder.WriteString("/passage/?")
+					_, _ = builder.WriteString(query.Encode())
 					statusCode, body, err := fasthttp.Get(nil, builder.String())
 					if err != nil {
 						helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")

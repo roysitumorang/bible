@@ -6,6 +6,8 @@ import (
 	"github.com/roysitumorang/bible/config"
 	"github.com/roysitumorang/bible/helper"
 	"github.com/roysitumorang/bible/migration"
+	bookQuery "github.com/roysitumorang/bible/modules/book/query"
+	bookUseCase "github.com/roysitumorang/bible/modules/book/usecase"
 	languageQuery "github.com/roysitumorang/bible/modules/language/query"
 	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
 	versionQuery "github.com/roysitumorang/bible/modules/version/query"
@@ -20,6 +22,7 @@ type (
 		BibleGateway    *biblegateway.BibleGateway
 		LanguageUseCase languageUseCase.LanguageUseCase
 		VersionUseCase  versionUseCase.VersionUseCase
+		BookUseCase     bookUseCase.BookUseCase
 	}
 )
 
@@ -39,12 +42,15 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	bibleGateway := biblegateway.New(dbRead, dbWrite)
 	languageQuery := languageQuery.New(dbRead, dbWrite)
 	versionQuery := versionQuery.New(dbRead, dbWrite)
+	bookQuery := bookQuery.New(dbRead, dbWrite)
 	languageUseCase := languageUseCase.New(languageQuery)
 	versionUseCase := versionUseCase.New(versionQuery)
+	bookUseCase := bookUseCase.New(bookQuery)
 	return &Service{
 		Migration:       migration,
 		BibleGateway:    bibleGateway,
 		LanguageUseCase: languageUseCase,
 		VersionUseCase:  versionUseCase,
+		BookUseCase:     bookUseCase,
 	}, nil
 }
