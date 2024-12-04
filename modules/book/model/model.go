@@ -7,6 +7,7 @@ import (
 type (
 	Filter struct {
 		VersionUID string
+		Names      []string
 	}
 
 	FilterOption func(q *Filter)
@@ -40,5 +41,11 @@ func NewFilter(options ...FilterOption) *Filter {
 func WithVersionUID(versionUID string) FilterOption {
 	return func(q *Filter) {
 		q.VersionUID = versionUID
+	}
+}
+
+func WithNames(names ...string) FilterOption {
+	return func(q *Filter) {
+		q.Names = names
 	}
 }

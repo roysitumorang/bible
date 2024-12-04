@@ -5,6 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
+	bookModel "github.com/roysitumorang/bible/modules/book/model"
+	bookUseCase "github.com/roysitumorang/bible/modules/book/usecase"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	"github.com/roysitumorang/bible/modules/verse/sanitizer"
 	verseUseCase "github.com/roysitumorang/bible/modules/verse/usecase"
@@ -13,14 +15,17 @@ import (
 
 type (
 	verseHTTPHandler struct {
+		bookUseCase  bookUseCase.BookUseCase
 		verseUseCase verseUseCase.VerseUseCase
 	}
 )
 
 func New(
+	bookUseCase bookUseCase.BookUseCase,
 	verseUseCase verseUseCase.VerseUseCase,
 ) *verseHTTPHandler {
 	return &verseHTTPHandler{
+		bookUseCase:  bookUseCase,
 		verseUseCase: verseUseCase,
 	}
 }
@@ -32,12 +37,27 @@ func (q *verseHTTPHandler) Mount(r fiber.Router) {
 func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	ctx := context.Background()
 	ctxt := "VersePresenter-FindVerses"
-	filter, err := sanitizer.FindVerses(ctx, c)
+	versesFilter, err := sanitizer.FindVerses(ctx, c)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
 		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
-	verses, err := q.verseUseCase.FindVerses(ctx, filter)
+	mapBookChaptersCount := map[string]int{}
+	if n := len(versesFilter.Books); n > 0 {
+		bookNames := make([]string, n)
+		for i, book := range versesFilter.Books {
+			bookNames[i] = book.Name
+		}
+		books, err := q.bookUseCase.FindBooks(ctx, bookModel.NewFilter(bookModel.WithNames(bookNames...)))
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
+			return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		}
+		for _, book := range books {
+			mapBookChaptersCount[book.Name] = book.ChaptersCount
+		}
+	}
+	verses, err := q.verseUseCase.FindVerses(ctx, versesFilter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
 		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
@@ -49,11 +69,15 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		}
 		mapBookChapterVerses[verse.BookName][verse.Chapter] = append(mapBookChapterVerses[verse.BookName][verse.Chapter], verse)
 	}
-	response := make([]verseModel.Passage, len(filter.Books))
-	for i, book := range filter.Books {
+	response := make([]verseModel.Passage, len(versesFilter.Books))
+	for i, book := range versesFilter.Books {
+		chaptersCount, ok := mapBookChaptersCount[book.Name]
+		if !ok {
+			continue
+		}
 		chapterEnd := book.ChapterStart
 		if book.ChapterEnd > 0 {
-			chapterEnd = book.ChapterEnd
+			chapterEnd = min(book.ChapterEnd, chaptersCount)
 		}
 		var k int
 		chapters := make([]verseModel.Chapter, chapterEnd-book.ChapterStart+1)

@@ -35,7 +35,10 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 	ctxt := "BookQuery-FindBooks"
 	response = make([]bookModel.Book, 0)
 	query := "SELECT COUNT(1) FROM books b JOIN versions v ON b.version_uid = v.uid"
-	var params []interface{}
+	var (
+		params  []interface{}
+		builder strings.Builder
+	)
 	if filter != nil {
 		var conditions []string
 		if filter.VersionUID != "" {
@@ -44,6 +47,23 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 			conditions = append(
 				conditions,
 				fmt.Sprintf("b.version_uid = $%d", n),
+			)
+		}
+		if n := len(filter.Names); n > 0 {
+			builder.Reset()
+			_, _ = builder.WriteString("b.name IN (")
+			for i, name := range filter.Names {
+				params = append(params, name)
+				if i > 0 {
+					_, _ = builder.WriteString(",")
+				}
+				_, _ = builder.WriteString("$")
+				_, _ = builder.WriteString(strconv.Itoa(len(params)))
+			}
+			_, _ = builder.WriteString(")")
+			conditions = append(
+				conditions,
+				builder.String(),
 			)
 		}
 		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
@@ -80,10 +100,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 		return
 	}
 	defer rows.Close()
-	var (
-		i       int
-		builder strings.Builder
-	)
+	var i int
 	for rows.Next() {
 		var (
 			book        = response[i]

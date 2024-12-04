@@ -2,11 +2,16 @@ package sanitizer
 
 import (
 	"context"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
+)
+
+var (
+	pattern = regexp.MustCompile(`^(.*) (.*)$`)
 )
 
 func FindVerses(ctx context.Context, c *fiber.Ctx) (response *verseModel.Filter, err error) {
@@ -16,12 +21,12 @@ func FindVerses(ctx context.Context, c *fiber.Ctx) (response *verseModel.Filter,
 	}
 	keywords := strings.Split(c.Query("q"), ";")
 	for _, keyword := range keywords {
-		parts := strings.Split(keyword, " ")
+		parts := pattern.FindStringSubmatch(keyword)
 		n := len(parts)
-		if n != 2 && parts[0] == "" {
+		if n != 3 {
 			continue
 		}
-		bookName, chapters := parts[0], parts[1]
+		bookName, chapters := parts[1], parts[2]
 		var chapterStart, chapterEnd int
 		if strings.Contains(chapters, "-") {
 			subParts := strings.Split(chapters, "-")
