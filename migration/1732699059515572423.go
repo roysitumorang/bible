@@ -187,12 +187,20 @@ func init() {
 			`CREATE TABLE verses (
 				id bigint NOT NULL PRIMARY KEY
 				, uid character varying NOT NULL UNIQUE
+				, book_uid character varying NOT NULL REFERENCES books (uid)
 				, chapter integer NOT NULL
 				, number integer NOT NULL
 				, body character varying NOT NULL
 				, created_at timestamp with time zone NOT NULL
 				, updated_at timestamp with time zone NOT NULL
 			);`,
+		); err != nil {
+			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
+			return
+		}
+		if _, err = tx.Exec(
+			ctx,
+			`CREATE INDEX ON verses (book_uid);`,
 		); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 			return
@@ -206,7 +214,7 @@ func init() {
 		}
 		if _, err = tx.Exec(
 			ctx,
-			`CREATE UNIQUE INDEX ON verses (number, chapter);`,
+			`CREATE UNIQUE INDEX ON verses (number, chapter, book_uid);`,
 		); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 		}

@@ -419,17 +419,19 @@ func (q *BibleGateway) Sync(ctx context.Context) (err error) {
 						`INSERT INTO verses (
 							id
 							, uid
+							, book_uid
 							, chapter
 							, number
 							, body
 							, created_at
 							, updated_at
-						) VALUES ($1, $2, $3, $4, $5, $6, $6)
-						ON CONFLICT (number, chapter) DO UPDATE SET
-							body = $5
-							, updated_at = $6`,
+						) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+						ON CONFLICT (number, chapter, book_uid) DO UPDATE SET
+							body = $6
+							, updated_at = $7`,
 						verse.ID,
 						verse.UID,
+						book.UID,
 						verse.Chapter,
 						verse.Number,
 						verse.Body,
