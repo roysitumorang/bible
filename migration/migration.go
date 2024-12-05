@@ -92,21 +92,21 @@ func (m *Migration) Migrate(ctx context.Context) error {
 			err := fmt.Errorf("migration function for version %d not found", version)
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrOK")
 			if errRollback := tx.Rollback(ctx); errRollback != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrRollback")
+				helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
 			}
 			return err
 		}
 		if err := function(ctx, tx); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrFunction")
 			if errRollback := tx.Rollback(ctx); errRollback != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrRollback")
+				helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
 			}
 			return err
 		}
 		if _, err := tx.Exec(ctx, `INSERT INTO "migrations" ("version") VALUES ($1)`, version); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 			if errRollback := tx.Rollback(ctx); errRollback != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrRollback")
+				helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
 			}
 			return err
 		}
