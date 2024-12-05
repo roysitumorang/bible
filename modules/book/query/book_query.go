@@ -34,40 +34,41 @@ func New(
 func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (response []bookModel.Book, err error) {
 	ctxt := "BookQuery-FindBooks"
 	response = make([]bookModel.Book, 0)
+	if filter == nil {
+		return
+	}
 	query := "SELECT COUNT(1) FROM books b JOIN versions v ON b.version_uid = v.uid"
 	var (
-		params  []interface{}
-		builder strings.Builder
+		params     []interface{}
+		builder    strings.Builder
+		conditions []string
 	)
-	if filter != nil {
-		var conditions []string
-		if filter.VersionUID != "" {
-			params = append(params, filter.VersionUID)
-			n := len(params)
-			conditions = append(
-				conditions,
-				fmt.Sprintf("b.version_uid = $%d", n),
-			)
-		}
-		if n := len(filter.Names); n > 0 {
-			builder.Reset()
-			_, _ = builder.WriteString("b.name IN (")
-			for i, name := range filter.Names {
-				params = append(params, name)
-				if i > 0 {
-					_, _ = builder.WriteString(",")
-				}
-				_, _ = builder.WriteString("$")
-				_, _ = builder.WriteString(strconv.Itoa(len(params)))
-			}
-			_, _ = builder.WriteString(")")
-			conditions = append(
-				conditions,
-				builder.String(),
-			)
-		}
-		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
+	if filter.VersionUID != "" {
+		params = append(params, filter.VersionUID)
+		n := len(params)
+		conditions = append(
+			conditions,
+			fmt.Sprintf("b.version_uid = $%d", n),
+		)
 	}
+	if n := len(filter.Names); n > 0 {
+		builder.Reset()
+		_, _ = builder.WriteString("b.name IN (")
+		for i, name := range filter.Names {
+			params = append(params, name)
+			if i > 0 {
+				_, _ = builder.WriteString(",")
+			}
+			_, _ = builder.WriteString("$")
+			_, _ = builder.WriteString(strconv.Itoa(len(params)))
+		}
+		_, _ = builder.WriteString(")")
+		conditions = append(
+			conditions,
+			builder.String(),
+		)
+	}
+	query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
 	var count int
 	if err = q.dbRead.QueryRow(ctx, query, params...).Scan(&count); err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
@@ -131,7 +132,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 			query.Set("version", versionCode)
 			query.Set("q", builder.String())
 			builder.Reset()
-			_, _ = builder.WriteString("/v1/verses?")
+			_, _ = builder.WriteString(filter.PaginationURL)
 			_, _ = builder.WriteString(query.Encode())
 			chapter := book.Chapters[j]
 			chapter.Number = k

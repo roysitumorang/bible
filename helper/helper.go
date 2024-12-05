@@ -24,7 +24,9 @@ var (
 	snowflakeNode *snowflake.Node
 	sqIDs         *sqids.Sqids
 	timeZone      *time.Location
-	InitHelper    = sync.OnceValue(func() (err error) {
+	env,
+	paginationHost string
+	InitHelper = sync.OnceValue(func() (err error) {
 		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
 			return
 		}
@@ -47,15 +49,16 @@ var (
 		if !ok || location == "" {
 			return errors.New("env TIME_ZONE is required")
 		}
-		timeZone, err = time.LoadLocation(location)
-		return
-	})
-	GetEnv = sync.OnceValue(func() string {
-		env := os.Getenv("ENV")
-		if env == "" {
-			env = "development"
+		if timeZone, err = time.LoadLocation(location); err != nil {
+			return
 		}
-		return env
+		if env, ok = os.LookupEnv("ENV"); !ok {
+			return errors.New("env ENV is required")
+		}
+		if paginationHost, ok = os.LookupEnv("PAGINATION_HOST"); !ok || paginationHost == "" {
+			err = errors.New("env PAGINATION_HOST is required")
+		}
+		return
 	})
 )
 
@@ -87,4 +90,12 @@ func GetContext(ctx context.Context, c *fiber.Ctx) context.Context {
 
 func LoadTimeZone() *time.Location {
 	return timeZone
+}
+
+func GetEnv() string {
+	return env
+}
+
+func GetPaginationHost() string {
+	return paginationHost
 }

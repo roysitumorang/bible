@@ -2,6 +2,7 @@ package presenter
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
@@ -36,6 +37,12 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := context.Background()
 	ctxt := "VersionPresenter-FindVersion"
+	var builder strings.Builder
+	_, _ = builder.Write(c.Request().URI().Scheme())
+	_, _ = builder.WriteString("://")
+	_, _ = builder.WriteString(helper.GetPaginationHost())
+	_, _ = builder.WriteString("/v1/verses")
+	paginationURL := builder.String()
 	filter := versionModel.NewFilter(versionModel.WithVersionUID(c.Params("uid")))
 	versions, err := q.versionUseCase.FindVersions(ctx, filter)
 	if err != nil {
@@ -46,7 +53,13 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 		return helper.NewResponse(fiber.StatusNotFound, "version not found", nil).WriteResponse(c)
 	}
 	response := versions[0]
-	if response.Books, err = q.bookUseCase.FindBooks(ctx, bookModel.NewFilter(bookModel.WithVersionUID(response.UID))); err != nil {
+	if response.Books, err = q.bookUseCase.FindBooks(
+		ctx,
+		bookModel.NewFilter(
+			bookModel.WithVersionUID(response.UID),
+			bookModel.WithPaginationURL(paginationURL),
+		),
+	); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
 		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}

@@ -6,8 +6,9 @@ import (
 
 type (
 	Filter struct {
-		VersionUID string
-		Names      []string
+		VersionUID,
+		PaginationURL string
+		Names []string
 	}
 
 	FilterOption func(q *Filter)
@@ -41,6 +42,12 @@ func NewFilter(options ...FilterOption) *Filter {
 func WithVersionUID(versionUID string) FilterOption {
 	return func(q *Filter) {
 		q.VersionUID = versionUID
+	}
+}
+
+func WithPaginationURL(paginationURL string) FilterOption {
+	return func(q *Filter) {
+		q.PaginationURL = paginationURL
 	}
 }
 
