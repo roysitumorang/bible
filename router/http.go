@@ -107,7 +107,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 	listenerPort := fmt.Sprintf(":%d", port)
 	err := r.Listen(listenerPort)
 	if err != nil {
-		helper.Log(ctx, zap.FatalLevel, err.Error(), ctxt, "ErrListen")
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrListen")
 	}
 	return err
 }
