@@ -1,7 +1,6 @@
 package presenter
 
 import (
-	"context"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,12 +34,10 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 }
 
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
-	ctx := context.Background()
+	ctx := c.UserContext()
 	ctxt := "VersionPresenter-FindVersion"
 	var builder strings.Builder
-	_, _ = builder.Write(c.Request().URI().Scheme())
-	_, _ = builder.WriteString("://")
-	_, _ = builder.WriteString(helper.GetPaginationHost())
+	_, _ = builder.WriteString(c.BaseURL())
 	_, _ = builder.WriteString("/v1/verses")
 	paginationURL := builder.String()
 	filter := versionModel.NewFilter(versionModel.WithVersionUID(c.Params("uid")))

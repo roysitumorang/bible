@@ -1,6 +1,9 @@
 package helper
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -10,25 +13,31 @@ const (
 
 type (
 	Response struct {
-		Code    int         `json:"code"`
-		Message string      `json:"message,omitempty"`
-		Data    interface{} `json:"data,omitempty"`
-		App     string      `json:"app"`
+		RequestID  string      `json:"request_id"`
+		StatusCode int         `json:"status_code"`
+		Message    string      `json:"message,omitempty"`
+		Status     string      `json:"status"`
+		Timestamp  time.Time   `json:"timestamp"`
+		Data       interface{} `json:"data,omitempty"`
+		App        string      `json:"app"`
 	}
 )
 
-func NewResponse(code int, msg string, data interface{}) *Response {
+func NewResponse(statusCode int, message string, data interface{}) *Response {
 	return &Response{
-		Code:    code,
-		Message: msg,
-		Data:    data,
-		App:     APP,
+		StatusCode: statusCode,
+		Message:    message,
+		Status:     http.StatusText(statusCode),
+		Timestamp:  time.Now(),
+		Data:       data,
+		App:        APP,
 	}
 }
 
 func (r *Response) WriteResponse(c *fiber.Ctx) error {
-	if r.Code == fiber.StatusNoContent {
-		return c.SendStatus(r.Code)
+	if r.StatusCode == fiber.StatusNoContent {
+		return c.SendStatus(r.StatusCode)
 	}
-	return c.Status(r.Code).JSON(r)
+	r.RequestID = ByteSlice2String(c.Response().Header.Peek(fiber.HeaderXRequestID))
+	return c.Status(r.StatusCode).JSON(r)
 }

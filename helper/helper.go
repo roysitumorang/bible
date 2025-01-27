@@ -15,6 +15,10 @@ import (
 	"github.com/sqids/sqids-go"
 )
 
+type (
+	contextKey string
+)
+
 const (
 	letters                = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	lowerCaseAlphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -81,7 +85,6 @@ func GenerateUniqueID() (numericID int64, alphaNumericID string, err error) {
 }
 
 func GetContext(ctx context.Context, c *fiber.Ctx) context.Context {
-	type contextKey string
 	if requestID := c.Get(fiber.HeaderXRequestID); requestID != "" {
 		ctx = context.WithValue(ctx, contextKey(fiber.HeaderXRequestID), requestID)
 	}
@@ -94,8 +97,4 @@ func LoadTimeZone() *time.Location {
 
 func GetEnv() string {
 	return env
-}
-
-func GetPaginationHost() string {
-	return paginationHost
 }

@@ -1,8 +1,6 @@
 package presenter
 
 import (
-	"context"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
 	bookModel "github.com/roysitumorang/bible/modules/book/model"
@@ -35,7 +33,7 @@ func (q *verseHTTPHandler) Mount(r fiber.Router) {
 }
 
 func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
-	ctx := context.Background()
+	ctx := c.UserContext()
 	ctxt := "VersePresenter-FindVerses"
 	versesFilter, err := sanitizer.FindVerses(ctx, c)
 	if err != nil {

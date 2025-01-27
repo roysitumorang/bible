@@ -133,6 +133,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 			query.Set("q", builder.String())
 			builder.Reset()
 			_, _ = builder.WriteString(filter.PaginationURL)
+			_, _ = builder.WriteString("?")
 			_, _ = builder.WriteString(query.Encode())
 			chapter := book.Chapters[j]
 			chapter.Number = k

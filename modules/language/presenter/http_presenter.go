@@ -1,8 +1,6 @@
 package presenter
 
 import (
-	"context"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
 	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
@@ -21,7 +19,6 @@ type (
 func New(
 	languageUseCase languageUseCase.LanguageUseCase,
 	versionUseCase versionUseCase.VersionUseCase,
-
 ) *languageHTTPHandler {
 	return &languageHTTPHandler{
 		languageUseCase: languageUseCase,
@@ -34,7 +31,7 @@ func (q *languageHTTPHandler) Mount(r fiber.Router) {
 }
 
 func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
-	ctx := context.Background()
+	ctx := c.UserContext()
 	ctxt := "LanguagePresenter-FindLanguages"
 	languages, err := q.languageUseCase.FindLanguages(ctx)
 	if err != nil {
