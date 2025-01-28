@@ -89,9 +89,9 @@ func EncodeSqIDs(numbers ...uint64) (string, error) {
 	return sqIDs.Encode(numbers)
 }
 
-func GenerateUniqueID() (numericID int64, alphaNumericID string, err error) {
-	numericID = snowflakeNode.Generate().Int64()
-	alphaNumericID, err = EncodeSqIDs(uint64(numericID))
+func GenerateUniqueID() (internalID int64, externalID string, err error) {
+	internalID = snowflakeNode.Generate().Int64()
+	externalID, err = EncodeSqIDs(uint64(internalID))
 	return
 }
 
