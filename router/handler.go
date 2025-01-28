@@ -10,6 +10,7 @@ import (
 	bookUseCase "github.com/roysitumorang/bible/modules/book/usecase"
 	languageQuery "github.com/roysitumorang/bible/modules/language/query"
 	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
+	testamentQuery "github.com/roysitumorang/bible/modules/testament/query"
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
 	verseUseCase "github.com/roysitumorang/bible/modules/verse/usecase"
 	versionQuery "github.com/roysitumorang/bible/modules/version/query"
@@ -22,8 +23,6 @@ import (
 type (
 	Service struct {
 		Migration       *migration.Migration
-		BibleGateway    *biblegateway.BibleGateway
-		AlkitabToba     *alkitabtoba.AlkitabToba
 		LanguageUseCase languageUseCase.LanguageUseCase
 		VersionUseCase  versionUseCase.VersionUseCase
 		BookUseCase     bookUseCase.BookUseCase
@@ -44,20 +43,19 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 		return nil, err
 	}
 	migration := migration.New(dbRead, dbWrite)
-	bibleGateway := biblegateway.New(dbRead, dbWrite)
-	alkitabToba := alkitabtoba.New(dbRead, dbWrite)
+	bibleGateway := biblegateway.New()
+	alkitabToba := alkitabtoba.New()
 	languageQuery := languageQuery.New(dbRead, dbWrite)
 	versionQuery := versionQuery.New(dbRead, dbWrite)
 	bookQuery := bookQuery.New(dbRead, dbWrite)
 	verseQuery := verseQuery.New(dbRead, dbWrite)
-	languageUseCase := languageUseCase.New(languageQuery)
+	testamentQuery := testamentQuery.New(dbRead, dbWrite)
+	languageUseCase := languageUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, bibleGateway, alkitabToba)
 	versionUseCase := versionUseCase.New(versionQuery)
 	bookUseCase := bookUseCase.New(bookQuery)
 	verseUseCase := verseUseCase.New(verseQuery)
 	return &Service{
 		Migration:       migration,
-		BibleGateway:    bibleGateway,
-		AlkitabToba:     alkitabToba,
 		LanguageUseCase: languageUseCase,
 		VersionUseCase:  versionUseCase,
 		BookUseCase:     bookUseCase,

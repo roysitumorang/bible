@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -95,6 +96,50 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 		}
 		response[i] = version
 		i++
+	}
+	return
+}
+
+func (q *versionQuery) SaveVersion(ctx context.Context, tx pgx.Tx, request versionModel.Version) (response string, err error) {
+	ctxt := "VersionQuery-SaveVersion"
+	versionID, versionUID, err := helper.GenerateUniqueID()
+	if err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
+		return
+	}
+	if err = tx.QueryRow(
+		ctx,
+		`INSERT INTO versions (
+			id
+			, uid
+			, language_uid
+			, name
+			, code
+			, slug
+			, created_at
+			, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+		ON CONFLICT (code) DO UPDATE SET
+			language_uid = $3
+			, name = $4
+			, slug = $6
+			, updated_at = $7
+		RETURNING uid`,
+		versionID,
+		versionUID,
+		request.LanguageUID,
+		request.Name,
+		request.Code,
+		request.Slug,
+		time.Now(),
+	).Scan(&response); err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
 	}
 	return
 }

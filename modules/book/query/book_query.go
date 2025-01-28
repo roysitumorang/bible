@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -142,6 +143,49 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 		}
 		response[i] = book
 		i++
+	}
+	return
+}
+
+func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.Book) (response string, err error) {
+	ctxt := "BookQuery-SaveBook"
+	bookID, bookUID, err := helper.GenerateUniqueID()
+	if err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
+		return
+	}
+	if err = tx.QueryRow(
+		ctx,
+		`INSERT INTO books (
+			id
+			, uid
+			, testament_uid
+			, version_uid
+			, name
+			, chapters_count
+			, created_at
+			, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+		ON CONFLICT (name, version_uid) DO UPDATE SET
+			testament_uid = $3
+			, chapters_count = $6
+			, updated_at = $7
+		RETURNING uid`,
+		bookID,
+		bookUID,
+		request.TestamentUID,
+		request.VersionUID,
+		request.Name,
+		request.ChaptersCount,
+		time.Now(),
+	).Scan(&response); err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
 	}
 	return
 }

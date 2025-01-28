@@ -28,9 +28,8 @@ var (
 	snowflakeNode *snowflake.Node
 	sqIDs         *sqids.Sqids
 	timeZone      *time.Location
-	env,
-	paginationHost string
-	InitHelper = sync.OnceValue(func() (err error) {
+	env           string
+	InitHelper    = sync.OnceValue(func() (err error) {
 		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
 			return
 		}
@@ -58,9 +57,6 @@ var (
 		}
 		if env, ok = os.LookupEnv("ENV"); !ok {
 			return errors.New("env ENV is required")
-		}
-		if paginationHost, ok = os.LookupEnv("PAGINATION_HOST"); !ok || paginationHost == "" {
-			err = errors.New("env PAGINATION_HOST is required")
 		}
 		return
 	})

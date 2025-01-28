@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 )
 
 type (
@@ -14,15 +16,17 @@ type (
 	FilterOption func(q *Filter)
 
 	Book struct {
-		ID            int64     `json:"-"`
-		UID           string    `json:"id"`
-		TestamentUID  string    `json:"-"`
-		VersionUID    string    `json:"-"`
-		Name          string    `json:"name"`
-		ChaptersCount int       `json:"-"`
-		CreatedAt     time.Time `json:"-"`
-		UpdatedAt     time.Time `json:"-"`
-		Chapters      []Chapter `json:"chapters"`
+		ID            int64              `json:"-"`
+		UID           string             `json:"id"`
+		TestamentUID  string             `json:"-"`
+		VersionUID    string             `json:"-"`
+		Name          string             `json:"name"`
+		Slug          string             `json:"-"`
+		ChaptersCount int                `json:"-"`
+		CreatedAt     time.Time          `json:"-"`
+		UpdatedAt     time.Time          `json:"-"`
+		Chapters      []Chapter          `json:"chapters"`
+		Verses        []verseModel.Verse `json:"-"`
 	}
 
 	Chapter struct {

@@ -113,19 +113,12 @@ func main() {
 		},
 	}
 	cmdSync := &cobra.Command{
-		Use:   "sync (biblegateway|alkitabtoba)",
+		Use:   "sync",
 		Short: "sync passages from biblegateway.com/alkitabtoba.wordpress.com",
-		Args: func(_ *cobra.Command, args []string) (err error) {
-			if len(args) == 0 {
-				err = errors.New("requires at least 1 arg (new|run")
-				return
-			}
-			if args[0] != "biblegateway" && args[0] != "alkitabtoba" {
-				err = fmt.Errorf("invalid first flag specified: %s", args[0])
-			}
+		Args: func(_ *cobra.Command, _ []string) (err error) {
 			return
 		},
-		Run: func(_ *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			now := time.Now()
 			if err := godotenv.Load(".env"); err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrLoad")
@@ -144,23 +137,12 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 				return
 			}
-			var domain string
-			switch args[0] {
-			case "biblegateway":
-				if err = service.BibleGateway.Sync(ctx); err != nil {
-					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
-					return
-				}
-				domain = "biblegateway.com"
-			case "alkitabtoba":
-				if err = service.AlkitabToba.Sync(ctx); err != nil {
-					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
-					return
-				}
-				domain = "alkitabtoba.wordpress.com"
+			if err = service.LanguageUseCase.Sync(ctx); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
+				return
 			}
 			duration := time.Since(now)
-			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages from %s successfully in %s", domain, duration.String()), ctxt, "")
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages successfully in %s", duration.String()), ctxt, "")
 		},
 	}
 	rootCmd := &cobra.Command{Use: config.AppName}

@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -77,6 +78,52 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 		}
 		response[i] = language
 		i++
+	}
+	return
+}
+
+func (q *languageQuery) BeginTx(ctx context.Context) (response pgx.Tx, err error) {
+	ctxt := "LanguageQuery-BeginTx"
+	if response, err = q.dbWrite.Begin(ctx); err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrBegin")
+	}
+	return
+}
+
+func (q *languageQuery) SaveLanguage(ctx context.Context, tx pgx.Tx, request languageModel.Language) (response string, err error) {
+	ctxt := "LanguageQuery-SaveLanguage"
+	languageID, languageUID, err := helper.GenerateUniqueID()
+	if err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
+		return
+	}
+	if err = tx.QueryRow(
+		ctx,
+		`INSERT INTO languages (
+			id
+			, uid
+			, name
+			, code
+			, created_at
+			, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $5)
+		ON CONFLICT (code) DO UPDATE SET
+			name = $3
+			, updated_at = $5
+		RETURNING uid`,
+		languageID,
+		languageUID,
+		request.Name,
+		request.Code,
+		time.Now(),
+	).Scan(&response); err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 	}
 	return
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -130,6 +131,47 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 		}
 		response[i] = verse
 		i++
+	}
+	return
+}
+
+func (q *verseQuery) SaveVerse(ctx context.Context, tx pgx.Tx, request verseModel.Verse) (err error) {
+	ctxt := "VerseQuery-SaveVerse"
+	verseID, verseUID, err := helper.GenerateUniqueID()
+	if err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
+		return
+	}
+	if _, err = tx.Exec(
+		ctx,
+		`INSERT INTO verses (
+			id
+			, uid
+			, book_uid
+			, chapter
+			, number
+			, body
+			, created_at
+			, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+		ON CONFLICT (number, chapter, book_uid) DO UPDATE SET
+			body = $6
+			, updated_at = $7`,
+		verseID,
+		verseUID,
+		request.BookUID,
+		request.Chapter,
+		request.Number,
+		request.Body,
+		time.Now(),
+	); err != nil {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
+		}
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 	}
 	return
 }
