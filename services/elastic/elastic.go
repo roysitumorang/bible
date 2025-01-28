@@ -1,0 +1,107 @@
+package elastic
+
+import (
+	"context"
+	"net/url"
+
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/get"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/index"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/update"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/indices/create"
+	indicesDelete "github.com/elastic/go-elasticsearch/v8/typedapi/indices/delete"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+	"github.com/goccy/go-json"
+	"github.com/roysitumorang/bible/helper"
+	"go.uber.org/zap"
+)
+
+type (
+	Elastic struct {
+		client *elasticsearch.TypedClient
+	}
+)
+
+func New(
+	address *url.URL,
+	username,
+	password string,
+) (*Elastic, error) {
+	client, err := elasticsearch.NewTypedClient(
+		elasticsearch.Config{
+			Addresses: []string{address.String()},
+			Username:  username,
+			Password:  password,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &Elastic{
+		client: client,
+	}, nil
+}
+
+func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *types.TypeMapping) (*create.Response, error) {
+	ctxt := "ElasticService-CreateIndex"
+	response, err := q.client.Indices.Create(indexName).Mappings(mappings).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) ReIndex(ctx context.Context, indexName, docID string, doc *create.Request) (*index.Response, error) {
+	ctxt := "ElasticService-ReIndex"
+	response, err := q.client.Index(indexName).Id(docID).Request(doc).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) FindDocByID(ctx context.Context, indexName, docID string) (*get.Response, error) {
+	ctxt := "ElasticService-FindDocByID"
+	response, err := q.client.Get(indexName, docID).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) Search(ctx context.Context, indexName string, request *search.Request) (*search.Response, error) {
+	ctxt := "ElasticService-Search"
+	response, err := q.client.Search().Index(indexName).Request(request).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) Update(ctx context.Context, indexName, docID string, doc interface{}) (*update.Response, error) {
+	ctxt := "ElasticService-Update"
+	docByte, err := json.Marshal(doc)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMarshal")
+		return nil, err
+	}
+	response, err := q.client.Update(indexName, docID).Request(
+		&update.Request{
+			Doc: docByte,
+		},
+	).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) DeleteIndex(ctx context.Context, indexName string) (*indicesDelete.Response, error) {
+	ctxt := "ElasticService-Delete"
+	response, err := q.client.Indices.Delete(indexName).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}

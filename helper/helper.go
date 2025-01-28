@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"net/url"
 	"os"
 	"strconv"
 	"sync"
@@ -28,8 +29,11 @@ var (
 	snowflakeNode *snowflake.Node
 	sqIDs         *sqids.Sqids
 	timeZone      *time.Location
-	env           string
-	InitHelper    = sync.OnceValue(func() (err error) {
+	env,
+	elasticUsername,
+	elasticPassword string
+	elasticAddress *url.URL
+	InitHelper     = sync.OnceValue(func() (err error) {
 		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
 			return
 		}
@@ -58,6 +62,17 @@ var (
 		if env, ok = os.LookupEnv("ENV"); !ok {
 			return errors.New("env ENV is required")
 		}
+		if elasticUsername, ok = os.LookupEnv("ELASTIC_USERNAME"); !ok || elasticUsername == "" {
+			return errors.New("env ELASTIC_USERNAME is required")
+		}
+		if elasticPassword, ok = os.LookupEnv("ELASTIC_PASSWORD"); !ok || elasticPassword == "" {
+			return errors.New("env ELASTIC_PASSWORD is required")
+		}
+		envElasticAddress, ok := os.LookupEnv("ELASTIC_ADDRESS")
+		if !ok || envElasticAddress == "" {
+			return errors.New("env ELASTIC_ADDRESS is required")
+		}
+		elasticAddress, err = url.Parse(envElasticAddress)
 		return
 	})
 )
@@ -93,4 +108,16 @@ func LoadTimeZone() *time.Location {
 
 func GetEnv() string {
 	return env
+}
+
+func GetElasticUsername() string {
+	return elasticUsername
+}
+
+func GetElasticPassword() string {
+	return elasticPassword
+}
+
+func GetElasticAddress() *url.URL {
+	return elasticAddress
 }

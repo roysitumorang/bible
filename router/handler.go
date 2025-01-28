@@ -17,12 +17,14 @@ import (
 	versionUseCase "github.com/roysitumorang/bible/modules/version/usecase"
 	"github.com/roysitumorang/bible/services/alkitabtoba"
 	"github.com/roysitumorang/bible/services/biblegateway"
+	"github.com/roysitumorang/bible/services/elastic"
 	"go.uber.org/zap"
 )
 
 type (
 	Service struct {
 		Migration       *migration.Migration
+		Elastic         *elastic.Elastic
 		LanguageUseCase languageUseCase.LanguageUseCase
 		VersionUseCase  versionUseCase.VersionUseCase
 		BookUseCase     bookUseCase.BookUseCase
@@ -45,6 +47,11 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	migration := migration.New(dbRead, dbWrite)
 	bibleGateway := biblegateway.New()
 	alkitabToba := alkitabtoba.New()
+	elastic, err := elastic.New(helper.GetElasticAddress(), helper.GetElasticUsername(), helper.GetElasticPassword())
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrNew")
+		return nil, err
+	}
 	languageQuery := languageQuery.New(dbRead, dbWrite)
 	versionQuery := versionQuery.New(dbRead, dbWrite)
 	bookQuery := bookQuery.New(dbRead, dbWrite)
@@ -56,6 +63,7 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	verseUseCase := verseUseCase.New(verseQuery)
 	return &Service{
 		Migration:       migration,
+		Elastic:         elastic,
 		LanguageUseCase: languageUseCase,
 		VersionUseCase:  versionUseCase,
 		BookUseCase:     bookUseCase,
