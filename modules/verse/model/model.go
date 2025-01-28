@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -19,15 +20,16 @@ type (
 	}
 
 	Verse struct {
-		ID        int64     `json:"-"`
-		UID       string    `json:"id"`
-		BookUID   string    `json:"-"`
-		Chapter   int       `json:"-"`
-		Number    int       `json:"number"`
-		Body      string    `json:"body"`
-		CreatedAt time.Time `json:"-"`
-		UpdatedAt time.Time `json:"-"`
-		BookName  string    `json:"-"`
+		ID          int64     `json:"-"`
+		UID         string    `json:"id"`
+		BookUID     string    `json:"-"`
+		Chapter     int       `json:"-"`
+		Number      int       `json:"number"`
+		Body        string    `json:"body"`
+		CreatedAt   time.Time `json:"-"`
+		UpdatedAt   time.Time `json:"-"`
+		BookName    string    `json:"-"`
+		VersionCode string    `json:"-"`
 	}
 
 	Chapter struct {
@@ -40,6 +42,15 @@ type (
 		ChapterStart int       `json:"chapter_start"`
 		ChapterEnd   int       `json:"chapter_end"`
 		Chapters     []Chapter `json:"chapters"`
+	}
+
+	IndexDoc struct {
+		ID        string `json:"id"`
+		Version   string `json:"version"`
+		Book      string `json:"book"`
+		ChapterNo int    `json:"chapter_no"`
+		VerseNo   int    `json:"verse_no"`
+		Verse     string `json:"verse"`
 	}
 )
 
@@ -67,5 +78,16 @@ func WithBook(name string, chapterStart, chapterEnd int) FilterOption {
 				ChapterEnd:   chapterEnd,
 			},
 		)
+	}
+}
+
+func (v Verse) IndexDoc() IndexDoc {
+	return IndexDoc{
+		ID:        strconv.FormatInt(v.ID, 10),
+		Version:   v.VersionCode,
+		Book:      v.BookName,
+		ChapterNo: v.Chapter,
+		VerseNo:   v.Number,
+		Verse:     v.Body,
 	}
 }

@@ -33,6 +33,7 @@ var (
 	elasticUsername,
 	elasticPassword string
 	elasticAddress *url.URL
+	indexPassage   string
 	InitHelper     = sync.OnceValue(func() (err error) {
 		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
 			return
@@ -72,7 +73,12 @@ var (
 		if !ok || envElasticAddress == "" {
 			return errors.New("env ELASTIC_ADDRESS is required")
 		}
-		elasticAddress, err = url.Parse(envElasticAddress)
+		if elasticAddress, err = url.Parse(envElasticAddress); err != nil {
+			return
+		}
+		if indexPassage, ok = os.LookupEnv("INDEX_PASSAGE"); !ok || indexPassage == "" {
+			err = errors.New("env INDEX_PASSAGE is required")
+		}
 		return
 	})
 )
@@ -120,4 +126,8 @@ func GetElasticPassword() string {
 
 func GetElasticAddress() *url.URL {
 	return elasticAddress
+}
+
+func GetIndexPassage() string {
+	return indexPassage
 }

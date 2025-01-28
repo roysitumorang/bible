@@ -22,8 +22,7 @@ import (
 )
 
 type (
-	BibleGateway struct {
-	}
+	BibleGateway struct{}
 )
 
 const (

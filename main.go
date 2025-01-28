@@ -145,12 +145,66 @@ func main() {
 			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("sync passages successfully in %s", duration.String()), ctxt, "")
 		},
 	}
+	cmdIndex := &cobra.Command{
+		Use:   "index",
+		Short: "index (create|reindex|delete)",
+		Args: func(_ *cobra.Command, args []string) (err error) {
+			if len(args) == 0 {
+				err = errors.New("requires at least 1 arg (create|reindex|delete")
+				return
+			}
+			if args[0] != "create" && args[0] != "reindex" && args[0] != "delete" {
+				err = fmt.Errorf("invalid first flag specified: %s", args[0])
+			}
+			return
+		},
+		Run: func(_ *cobra.Command, args []string) {
+			now := time.Now()
+			if err := godotenv.Load(".env"); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrLoad")
+				return
+			}
+			if err := helper.InitHelper(); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrInitHelper")
+				return
+			}
+			service, err := router.MakeHandler(ctx)
+			if err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMakeHandler")
+				return
+			}
+			if err := service.Migration.Migrate(ctx); err != nil {
+				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
+				return
+			}
+			switch args[0] {
+			case "create":
+				if err = service.LanguageUseCase.CreateIndex(ctx); err != nil {
+					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateIndex")
+					return
+				}
+			case "reindex":
+				if err = service.LanguageUseCase.ReIndex(ctx); err != nil {
+					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrReIndex")
+					return
+				}
+			case "delete":
+				if err = service.LanguageUseCase.DeleteIndex(ctx); err != nil {
+					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDeleteIndex")
+					return
+				}
+			}
+			duration := time.Since(now)
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%s index passage successfully in %s", args[0], duration.String()), ctxt, "")
+		},
+	}
 	rootCmd := &cobra.Command{Use: config.AppName}
 	rootCmd.AddCommand(
 		cmdVersion,
 		cmdRun,
 		cmdMigration,
 		cmdSync,
+		cmdIndex,
 	)
 	rootCmd.SuggestionsMinimumDistance = 1
 	if err := rootCmd.Execute(); err != nil {

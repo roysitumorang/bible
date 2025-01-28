@@ -2,18 +2,20 @@ package elastic
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/bulk"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/get"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/core/index"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/update"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/indices/create"
-	indicesDelete "github.com/elastic/go-elasticsearch/v8/typedapi/indices/delete"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/indices/delete"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/goccy/go-json"
 	"github.com/roysitumorang/bible/helper"
+	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	"go.uber.org/zap"
 )
 
@@ -43,18 +45,42 @@ func New(
 	}, nil
 }
 
-func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *types.TypeMapping) (*create.Response, error) {
+func (q *Elastic) Ping(ctx context.Context) (response bool, err error) {
+	ctxt := "ElasticService-Ping"
+	if response, err = q.client.Ping().Do(ctx); err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return
+}
+
+func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *create.Request) (*create.Response, error) {
 	ctxt := "ElasticService-CreateIndex"
-	response, err := q.client.Indices.Create(indexName).Mappings(mappings).Do(ctx)
+	exists, err := q.client.Indices.Exists(indexName).IsSuccess(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+		return nil, err
+	}
+	if exists {
+		return nil, fmt.Errorf("index %s already exists", indexName)
+	}
+	response, err := q.client.Indices.Create(indexName).Request(mappings).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
 	}
 	return response, err
 }
 
-func (q *Elastic) ReIndex(ctx context.Context, indexName, docID string, doc *create.Request) (*index.Response, error) {
+func (q *Elastic) ReIndex(ctx context.Context, indexName string, verses []verseModel.Verse) (*bulk.Response, error) {
 	ctxt := "ElasticService-ReIndex"
-	response, err := q.client.Index(indexName).Id(docID).Request(doc).Do(ctx)
+	bulkIndexer := q.client.Bulk()
+	for _, verse := range verses {
+		doc := verse.IndexDoc()
+		if err := bulkIndexer.CreateOp(types.CreateOperation{Id_: &doc.ID}, doc); err != nil {
+			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateOp")
+			return nil, err
+		}
+	}
+	response, err := bulkIndexer.Index(indexName).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
 	}
@@ -97,8 +123,16 @@ func (q *Elastic) Update(ctx context.Context, indexName, docID string, doc inter
 	return response, err
 }
 
-func (q *Elastic) DeleteIndex(ctx context.Context, indexName string) (*indicesDelete.Response, error) {
+func (q *Elastic) DeleteIndex(ctx context.Context, indexName string) (*delete.Response, error) {
 	ctxt := "ElasticService-Delete"
+	exists, err := q.client.Indices.Exists(indexName).IsSuccess(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+		return nil, err
+	}
+	if !exists {
+		return nil, fmt.Errorf("index %s not found", indexName)
+	}
 	response, err := q.client.Indices.Delete(indexName).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")

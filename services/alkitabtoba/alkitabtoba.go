@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/roysitumorang/bible/helper"
 	bookModel "github.com/roysitumorang/bible/modules/book/model"
 	languageModel "github.com/roysitumorang/bible/modules/language/model"
@@ -21,10 +20,7 @@ import (
 )
 
 type (
-	AlkitabToba struct {
-		dbRead,
-		dbWrite *pgxpool.Pool
-	}
+	AlkitabToba struct{}
 )
 
 const (

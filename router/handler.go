@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 
 	"github.com/roysitumorang/bible/config"
 	"github.com/roysitumorang/bible/helper"
@@ -24,7 +25,6 @@ import (
 type (
 	Service struct {
 		Migration       *migration.Migration
-		Elastic         *elastic.Elastic
 		LanguageUseCase languageUseCase.LanguageUseCase
 		VersionUseCase  versionUseCase.VersionUseCase
 		BookUseCase     bookUseCase.BookUseCase
@@ -52,18 +52,25 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrNew")
 		return nil, err
 	}
+	ok, err := elastic.Ping(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrPing")
+		return nil, err
+	}
+	if !ok {
+		return nil, errors.New("failure to ping elastic")
+	}
 	languageQuery := languageQuery.New(dbRead, dbWrite)
 	versionQuery := versionQuery.New(dbRead, dbWrite)
 	bookQuery := bookQuery.New(dbRead, dbWrite)
 	verseQuery := verseQuery.New(dbRead, dbWrite)
 	testamentQuery := testamentQuery.New(dbRead, dbWrite)
-	languageUseCase := languageUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, bibleGateway, alkitabToba)
+	languageUseCase := languageUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, bibleGateway, alkitabToba, elastic, helper.GetIndexPassage())
 	versionUseCase := versionUseCase.New(versionQuery)
 	bookUseCase := bookUseCase.New(bookQuery)
 	verseUseCase := verseUseCase.New(verseQuery)
 	return &Service{
 		Migration:       migration,
-		Elastic:         elastic,
 		LanguageUseCase: languageUseCase,
 		VersionUseCase:  versionUseCase,
 		BookUseCase:     bookUseCase,

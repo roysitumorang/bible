@@ -34,7 +34,11 @@ func New(
 func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) (response []verseModel.Verse, err error) {
 	ctxt := "VerseQuery-FindVerses"
 	response = make([]verseModel.Verse, 0)
-	query := "SELECT COUNT(1) FROM verses v1 JOIN books b ON v1.book_uid = b.uid"
+	query :=
+		`SELECT COUNT(1)
+		FROM verses v1
+		JOIN books b ON v1.book_uid = b.uid
+		JOIN versions v2 ON b.version_uid = v2.uid`
 	var params []interface{}
 	if filter != nil {
 		conditions := make([]string, 2)
@@ -43,22 +47,13 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 			return
 		}
 		params = append(params, filter.VersionCode)
-		n := len(params)
-		conditions[0] = fmt.Sprintf(
-			`EXISTS(
-					SELECT 1
-					FROM versions v2
-					WHERE v2.uid = b.version_uid
-						AND v2.code = $%d
-			)`,
-			n,
-		)
+		conditions[0] = fmt.Sprintf("v2.code = $%d", len(params))
 		var builder strings.Builder
 		subConditions := make([]string, len(filter.Books))
 		for i, book := range filter.Books {
 			builder.Reset()
 			params = append(params, book.Name, book.ChapterStart)
-			n = len(params)
+			n := len(params)
 			_, _ = builder.WriteString("(b.name = $")
 			_, _ = builder.WriteString(strconv.Itoa(n - 1))
 			_, _ = builder.WriteString(" AND v1.chapter ")
@@ -100,7 +95,8 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 		, v1.body
 		, v1.created_at
 		, v1.updated_at
-		, b.name`,
+		, b.name
+		, v2.code`,
 	)
 	query = fmt.Sprintf("%s ORDER BY v1.id", query)
 	rows, err := q.dbRead.Query(ctx, query, params...)
@@ -125,6 +121,7 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 			&verse.CreatedAt,
 			&verse.UpdatedAt,
 			&verse.BookName,
+			&verse.VersionCode,
 		); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
 			return
