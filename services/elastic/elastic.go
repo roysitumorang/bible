@@ -96,9 +96,9 @@ func (q *Elastic) FindDocByID(ctx context.Context, indexName, docID string) (*ge
 	return response, err
 }
 
-func (q *Elastic) Search(ctx context.Context, indexName string, request *search.Request) (*search.Response, error) {
+func (q *Elastic) Search(ctx context.Context, indexName string, request *search.Request, offset, size int, sorts ...types.SortCombinations) (*search.Response, error) {
 	ctxt := "ElasticService-Search"
-	response, err := q.client.Search().Index(indexName).Request(request).Do(ctx)
+	response, err := q.client.Search().Index(indexName).Request(request).From(offset).Size(size).Sort(sorts...).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
 	}

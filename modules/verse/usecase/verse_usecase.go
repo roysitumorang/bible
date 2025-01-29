@@ -97,11 +97,16 @@ func (q *verseUseCase) SearchVerses(ctx context.Context, filter *verseModel.Filt
 			)
 		}
 	}
-	limit := 100
-	result, err := q.elastic.Search(ctx, q.indexName, &search.Request{
-		Query: query,
-		Size:  &limit,
-	})
+	result, err := q.elastic.Search(
+		ctx,
+		q.indexName,
+		&search.Request{
+			Query: query,
+		},
+		0,
+		10000,
+		"id_",
+	)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearch")
 		return
@@ -142,6 +147,7 @@ func (q *verseUseCase) CreateIndex(ctx context.Context) (err error) {
 		&create.Request{
 			Mappings: &types.TypeMapping{
 				Properties: map[string]types.Property{
+					"id_":        types.NewKeywordProperty(),
 					"id":         types.NewTextProperty(),
 					"version":    types.NewTextProperty(),
 					"book":       types.NewTextProperty(),
