@@ -23,7 +23,7 @@ import (
 type (
 	Elastic struct {
 		client *elasticsearch.TypedClient
-		mutex  sync.Mutex
+		mutex  sync.RWMutex
 	}
 )
 
@@ -44,7 +44,7 @@ func New(
 	}
 	return &Elastic{
 		client: client,
-		mutex:  sync.Mutex{},
+		mutex:  sync.RWMutex{},
 	}, nil
 }
 

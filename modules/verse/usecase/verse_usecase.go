@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/indices/create"
@@ -255,28 +255,37 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindTestaments")
 		return
 	}
-	var (
-		g errgroup.Group
-		biblegatewayLanguages,
-		alkitabtobaLanguages []model.Language
-	)
-	g.Go(func() error {
-		if biblegatewayLanguages, err = q.biblegateway.Sync(ctx, testaments); err != nil {
-			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
-		}
-		return err
-	})
-	g.Go(func() error {
-		if alkitabtobaLanguages, err = q.alkitabtoba.Sync(ctx, testaments); err != nil {
-			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
-		}
-		return err
-	})
-	if err = g.Wait(); err != nil {
-		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrWait")
-		return
+	wg := sync.WaitGroup{}
+	pool := &sync.Pool{
+		New: func() any {
+			return &[]model.Language{}
+		},
 	}
-	languages := slices.Concat(biblegatewayLanguages, alkitabtobaLanguages)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		biblegatewayLanguages, err := q.biblegateway.Sync(ctx, testaments)
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+			return
+		}
+		buffer := pool.Get().(*[]model.Language)
+		*buffer = append(*buffer, biblegatewayLanguages...)
+		pool.Put(buffer)
+	}()
+	go func() {
+		defer wg.Done()
+		alkitabtobaLanguages, err := q.alkitabtoba.Sync(ctx, testaments)
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+			return
+		}
+		buffer := pool.Get().(*[]model.Language)
+		*buffer = append(*buffer, alkitabtobaLanguages...)
+		pool.Put(buffer)
+	}()
+	wg.Wait()
+	languages := pool.Get().(*[]model.Language)
 	tx, err := q.verseQuery.BeginTx(ctx)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrBeginTx")
@@ -291,7 +300,7 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 			helper.Log(ctx, zap.ErrorLevel, errRollback.Error(), ctxt, "ErrRollback")
 		}
 	}()
-	for _, language := range languages {
+	for _, language := range *languages {
 		languageUID, err := q.languageQuery.SaveLanguage(ctx, tx, language)
 		if err != nil {
 			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveLanguage")
