@@ -179,17 +179,17 @@ func main() {
 			}
 			switch args[0] {
 			case "create":
-				if err = service.LanguageUseCase.CreateIndex(ctx); err != nil {
+				if err = service.VerseUseCase.CreateIndex(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateIndex")
 					return
 				}
 			case "reindex":
-				if err = service.LanguageUseCase.ReIndex(ctx); err != nil {
+				if err = service.VerseUseCase.ReIndex(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrReIndex")
 					return
 				}
 			case "delete":
-				if err = service.LanguageUseCase.DeleteIndex(ctx); err != nil {
+				if err = service.VerseUseCase.DeleteIndex(ctx); err != nil {
 					helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDeleteIndex")
 					return
 				}

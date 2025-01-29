@@ -65,10 +65,10 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	bookQuery := bookQuery.New(dbRead, dbWrite)
 	verseQuery := verseQuery.New(dbRead, dbWrite)
 	testamentQuery := testamentQuery.New(dbRead, dbWrite)
-	languageUseCase := languageUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, bibleGateway, alkitabToba, elastic, helper.GetIndexPassage())
+	languageUseCase := languageUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, bibleGateway, alkitabToba)
 	versionUseCase := versionUseCase.New(versionQuery)
 	bookUseCase := bookUseCase.New(bookQuery)
-	verseUseCase := verseUseCase.New(verseQuery)
+	verseUseCase := verseUseCase.New(verseQuery, elastic, helper.GetIndexPassage())
 	return &Service{
 		Migration:       migration,
 		LanguageUseCase: languageUseCase,

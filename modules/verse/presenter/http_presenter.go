@@ -55,9 +55,9 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 			mapBookChaptersCount[book.Name] = book.ChaptersCount
 		}
 	}
-	verses, err := q.verseUseCase.FindVerses(ctx, versesFilter)
+	verses, err := q.verseUseCase.SearchVerses(ctx, versesFilter)
 	if err != nil {
-		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearchVerses")
 		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	mapBookChapterVerses := map[string]map[int][]verseModel.Verse{}
@@ -65,7 +65,7 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		if _, ok := mapBookChapterVerses[verse.BookName]; !ok {
 			mapBookChapterVerses[verse.BookName] = map[int][]verseModel.Verse{}
 		}
-		mapBookChapterVerses[verse.BookName][verse.Chapter] = append(mapBookChapterVerses[verse.BookName][verse.Chapter], verse)
+		mapBookChapterVerses[verse.BookName][verse.Chapter] = append(mapBookChapterVerses[verse.BookName][verse.Chapter], verse.Doc())
 	}
 	response := make([]verseModel.Passage, len(versesFilter.Books))
 	for i, book := range versesFilter.Books {

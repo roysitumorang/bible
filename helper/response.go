@@ -20,6 +20,7 @@ type (
 		Message    string      `json:"message,omitempty"`
 		Status     string      `json:"status"`
 		Timestamp  time.Time   `json:"timestamp"`
+		Latency    string      `json:"latency"`
 		Data       interface{} `json:"data,omitempty"`
 		App        string      `json:"app"`
 	}
@@ -46,5 +47,6 @@ func (r *Response) WriteResponse(c *fiber.Ctx) error {
 	_, _ = builder.Write(c.Request().URI().FullURI())
 	r.RequestURL = builder.String()
 	r.RequestID = ByteSlice2String(c.Response().Header.Peek(fiber.HeaderXRequestID))
+	r.Latency = time.Since(c.Context().Time()).String()
 	return c.Status(r.StatusCode).JSON(r)
 }

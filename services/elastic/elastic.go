@@ -53,16 +53,17 @@ func (q *Elastic) Ping(ctx context.Context) (response bool, err error) {
 	return
 }
 
-func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *create.Request) (*create.Response, error) {
-	ctxt := "ElasticService-CreateIndex"
+func (q *Elastic) IndexExists(ctx context.Context, indexName string) (bool, error) {
+	ctxt := "ElasticService-IndexExists"
 	exists, err := q.client.Indices.Exists(indexName).IsSuccess(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
-		return nil, err
 	}
-	if exists {
-		return nil, fmt.Errorf("index %s already exists", indexName)
-	}
+	return exists, err
+}
+
+func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *create.Request) (*create.Response, error) {
+	ctxt := "ElasticService-CreateIndex"
 	response, err := q.client.Indices.Create(indexName).Request(mappings).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
@@ -74,8 +75,7 @@ func (q *Elastic) ReIndex(ctx context.Context, indexName string, verses []verseM
 	ctxt := "ElasticService-ReIndex"
 	bulkIndexer := q.client.Bulk()
 	for _, verse := range verses {
-		doc := verse.IndexDoc()
-		if err := bulkIndexer.CreateOp(types.CreateOperation{Id_: &doc.ID}, doc); err != nil {
+		if err := bulkIndexer.CreateOp(types.CreateOperation{Id_: &verse.UID}, verse); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateOp")
 			return nil, err
 		}
@@ -117,6 +117,26 @@ func (q *Elastic) Update(ctx context.Context, indexName, docID string, doc inter
 			Doc: docByte,
 		},
 	).Do(ctx)
+	if err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
+	}
+	return response, err
+}
+
+func (q *Elastic) Delete(ctx context.Context, indexName string, docIDs ...string) (*bulk.Response, error) {
+	ctxt := "ElasticService-Delete"
+	n := len(docIDs)
+	if n == 0 {
+		return nil, nil
+	}
+	bulkIndexer := q.client.Bulk()
+	for _, docID := range docIDs {
+		if err := bulkIndexer.DeleteOp(types.DeleteOperation{Id_: &docID}); err != nil {
+			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDeleteOp")
+			return nil, err
+		}
+	}
+	response, err := bulkIndexer.Index(indexName).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")
 	}
