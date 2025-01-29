@@ -34,6 +34,7 @@ var (
 	elasticPassword string
 	elasticAddress *url.URL
 	indexPassage   string
+	indexBatchSize int
 	InitHelper     = sync.OnceValue(func() (err error) {
 		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
 			return
@@ -77,7 +78,14 @@ var (
 			return
 		}
 		if indexPassage, ok = os.LookupEnv("INDEX_PASSAGE"); !ok || indexPassage == "" {
-			err = errors.New("env INDEX_PASSAGE is required")
+			return errors.New("env INDEX_PASSAGE is required")
+		}
+		envIndexBatchSize, ok := os.LookupEnv("INDEX_BATCH_SIZE")
+		if !ok || envIndexBatchSize == "" {
+			err = errors.New("env INDEX_BATCH_SIZE is required")
+		}
+		if indexBatchSize, _ = strconv.Atoi(envIndexBatchSize); indexBatchSize < 1 {
+			err = errors.New("env INDEX_BATCH_SIZE requires a positive integer")
 		}
 		return
 	})
@@ -130,4 +138,8 @@ func GetElasticAddress() *url.URL {
 
 func GetIndexPassage() string {
 	return indexPassage
+}
+
+func GetIndexBatchSize() int {
+	return indexBatchSize
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"sync"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/bulk"
@@ -22,6 +23,7 @@ import (
 type (
 	Elastic struct {
 		client *elasticsearch.TypedClient
+		mutex  sync.Mutex
 	}
 )
 
@@ -42,6 +44,7 @@ func New(
 	}
 	return &Elastic{
 		client: client,
+		mutex:  sync.Mutex{},
 	}, nil
 }
 
@@ -73,13 +76,16 @@ func (q *Elastic) CreateIndex(ctx context.Context, indexName string, mappings *c
 
 func (q *Elastic) ReIndex(ctx context.Context, indexName string, verses []verseModel.Verse) (*bulk.Response, error) {
 	ctxt := "ElasticService-ReIndex"
+	upsert := true
 	bulkIndexer := q.client.Bulk()
 	for _, verse := range verses {
-		if err := bulkIndexer.CreateOp(types.CreateOperation{Id_: &verse.UID}, verse); err != nil {
+		if err := bulkIndexer.UpdateOp(types.UpdateOperation{Id_: &verse.UID}, verse, &types.UpdateAction{DocAsUpsert: &upsert}); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrCreateOp")
 			return nil, err
 		}
 	}
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
 	response, err := bulkIndexer.Index(indexName).Do(ctx)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrDo")

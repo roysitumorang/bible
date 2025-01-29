@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
 	"github.com/roysitumorang/bible/services/elastic"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 type (
@@ -139,7 +141,7 @@ func (q *verseUseCase) CreateIndex(ctx context.Context) (err error) {
 		return
 	}
 	if exists {
-		return fmt.Errorf("index %s already exists", q.indexName)
+		return
 	}
 	if _, err = q.elastic.CreateIndex(
 		ctx,
@@ -173,17 +175,33 @@ func (q *verseUseCase) ReIndex(ctx context.Context) (err error) {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
 		return
 	}
-	n := len(verses)
-	if n == 0 {
+	total := len(verses)
+	if total == 0 {
 		helper.Log(ctx, zap.InfoLevel, "no verses to reindex", ctxt, "")
 		return
 	}
-	helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%d verses will be reindexed", n), ctxt, "")
-	if _, err = q.elastic.ReIndex(ctx, q.indexName, verses); err != nil {
-		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrReIndex")
+	helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%d verses will be reindexed", total), ctxt, "")
+	batchSize := helper.GetIndexBatchSize()
+	batches := int(math.Ceil(float64(total) / float64(batchSize)))
+	var g errgroup.Group
+	g.SetLimit(5)
+	for i := 0; i < batches; i++ {
+		g.Go(func() error {
+			offsetMin := i * batchSize
+			offsetMax := min(offsetMin+batchSize, total)
+			if _, err = q.elastic.ReIndex(ctx, q.indexName, verses[offsetMin:offsetMax]); err != nil {
+				helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrReIndex")
+				return err
+			}
+			helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%d verses[%d:%d] were reindexed", offsetMax-offsetMin, offsetMin, offsetMax), ctxt, "")
+			return nil
+		})
+	}
+	if err = g.Wait(); err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrWait")
 		return
 	}
-	helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%d verses were reindexed", n), ctxt, "")
+	helper.Log(ctx, zap.InfoLevel, fmt.Sprintf("%d verses were reindexed", total), ctxt, "")
 	return
 }
 
