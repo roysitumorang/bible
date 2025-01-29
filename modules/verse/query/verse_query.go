@@ -172,3 +172,11 @@ func (q *verseQuery) SaveVerse(ctx context.Context, tx pgx.Tx, request verseMode
 	}
 	return
 }
+
+func (q *verseQuery) BeginTx(ctx context.Context) (response pgx.Tx, err error) {
+	ctxt := "VerseQuery-BeginTx"
+	if response, err = q.dbWrite.Begin(ctx); err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrBegin")
+	}
+	return
+}

@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -11,9 +13,17 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/typedapi/indices/create"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/goccy/go-json"
+	"github.com/jackc/pgx/v5"
 	"github.com/roysitumorang/bible/helper"
+	bookQuery "github.com/roysitumorang/bible/modules/book/query"
+	"github.com/roysitumorang/bible/modules/language/model"
+	languageQuery "github.com/roysitumorang/bible/modules/language/query"
+	testamentQuery "github.com/roysitumorang/bible/modules/testament/query"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
+	versionQuery "github.com/roysitumorang/bible/modules/version/query"
+	"github.com/roysitumorang/bible/services/alkitabtoba"
+	"github.com/roysitumorang/bible/services/biblegateway"
 	"github.com/roysitumorang/bible/services/elastic"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -21,21 +31,39 @@ import (
 
 type (
 	verseUseCase struct {
-		verseQuery verseQuery.VerseQuery
-		elastic    *elastic.Elastic
-		indexName  string
+		testamentQuery testamentQuery.TestamentQuery
+		languageQuery  languageQuery.LanguageQuery
+		versionQuery   versionQuery.VersionQuery
+		bookQuery      bookQuery.BookQuery
+		verseQuery     verseQuery.VerseQuery
+		elastic        *elastic.Elastic
+		indexName      string
+		biblegateway   *biblegateway.BibleGateway
+		alkitabtoba    *alkitabtoba.AlkitabToba
 	}
 )
 
 func New(
+	testamentQuery testamentQuery.TestamentQuery,
+	languageQuery languageQuery.LanguageQuery,
+	versionQuery versionQuery.VersionQuery,
+	bookQuery bookQuery.BookQuery,
 	verseQuery verseQuery.VerseQuery,
 	elastic *elastic.Elastic,
 	indexName string,
+	biblegateway *biblegateway.BibleGateway,
+	alkitabtoba *alkitabtoba.AlkitabToba,
 ) VerseUseCase {
 	return &verseUseCase{
-		verseQuery: verseQuery,
-		elastic:    elastic,
-		indexName:  indexName,
+		testamentQuery: testamentQuery,
+		languageQuery:  languageQuery,
+		versionQuery:   versionQuery,
+		bookQuery:      bookQuery,
+		verseQuery:     verseQuery,
+		elastic:        elastic,
+		indexName:      indexName,
+		biblegateway:   biblegateway,
+		alkitabtoba:    alkitabtoba,
 	}
 }
 
@@ -107,7 +135,7 @@ func (q *verseUseCase) SearchVerses(ctx context.Context, filter *verseModel.Filt
 		},
 		0,
 		10000,
-		"id_",
+		"id",
 	)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearch")
@@ -149,8 +177,7 @@ func (q *verseUseCase) CreateIndex(ctx context.Context) (err error) {
 		&create.Request{
 			Mappings: &types.TypeMapping{
 				Properties: map[string]types.Property{
-					"id_":        types.NewKeywordProperty(),
-					"id":         types.NewTextProperty(),
+					"id":         types.NewKeywordProperty(),
 					"version":    types.NewTextProperty(),
 					"book":       types.NewTextProperty(),
 					"chapter_no": types.NewIntegerNumberProperty(),
@@ -217,6 +244,85 @@ func (q *verseUseCase) DeleteIndex(ctx context.Context) (err error) {
 	}
 	if _, err = q.elastic.DeleteIndex(ctx, q.indexName); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrDeleteIndex")
+	}
+	return
+}
+
+func (q *verseUseCase) Sync(ctx context.Context) (err error) {
+	ctxt := "VerseUseCase-Sync"
+	testaments, err := q.testamentQuery.FindTestaments(ctx)
+	if err != nil {
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindTestaments")
+		return
+	}
+	var (
+		g errgroup.Group
+		biblegatewayLanguages,
+		alkitabtobaLanguages []model.Language
+	)
+	g.Go(func() error {
+		if biblegatewayLanguages, err = q.biblegateway.Sync(ctx, testaments); err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+		}
+		return err
+	})
+	g.Go(func() error {
+		if alkitabtobaLanguages, err = q.alkitabtoba.Sync(ctx, testaments); err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+		}
+		return err
+	})
+	if err = g.Wait(); err != nil {
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrWait")
+		return
+	}
+	languages := slices.Concat(biblegatewayLanguages, alkitabtobaLanguages)
+	tx, err := q.verseQuery.BeginTx(ctx)
+	if err != nil {
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrBeginTx")
+		return
+	}
+	defer func() {
+		errRollback := tx.Rollback(ctx)
+		if errors.Is(errRollback, pgx.ErrTxClosed) {
+			errRollback = nil
+		}
+		if errRollback != nil {
+			helper.Log(ctx, zap.ErrorLevel, errRollback.Error(), ctxt, "ErrRollback")
+		}
+	}()
+	for _, language := range languages {
+		languageUID, err := q.languageQuery.SaveLanguage(ctx, tx, language)
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveLanguage")
+			return err
+		}
+		for _, version := range language.Versions {
+			version.LanguageUID = languageUID
+			versionUID, err := q.versionQuery.SaveVersion(ctx, tx, version)
+			if err != nil {
+				helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveVersion")
+				return err
+			}
+			for _, book := range version.Books {
+				book.VersionUID = versionUID
+				bookUID, err := q.bookQuery.SaveBook(ctx, tx, book)
+				if err != nil {
+					helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveBook")
+					return err
+				}
+				for _, verse := range book.Verses {
+					verse.BookUID = bookUID
+					if err = q.verseQuery.SaveVerse(ctx, tx, verse); err != nil {
+						helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveVerse")
+						return err
+					}
+				}
+			}
+		}
+	}
+	if err = tx.Commit(ctx); err != nil {
+		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrCommit")
 	}
 	return
 }

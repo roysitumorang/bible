@@ -9,6 +9,5 @@ import (
 type (
 	LanguageUseCase interface {
 		FindLanguages(ctx context.Context) (response []languageModel.Language, err error)
-		Sync(ctx context.Context) (err error)
 	}
 )

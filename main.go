@@ -137,7 +137,7 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 				return
 			}
-			if err = service.LanguageUseCase.Sync(ctx); err != nil {
+			if err = service.VerseUseCase.Sync(ctx); err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrSync")
 				return
 			}

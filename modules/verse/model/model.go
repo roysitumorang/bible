@@ -19,7 +19,7 @@ type (
 	}
 
 	Verse struct {
-		ID          int64     `json:"id_,string,omitempty"`
+		ID          int64     `json:"-"`
 		UID         string    `json:"id"`
 		BookUID     string    `json:"-"`
 		Chapter     int       `json:"chapter_no,omitempty"`
@@ -72,7 +72,6 @@ func WithBook(name string, chapterStart, chapterEnd int) FilterOption {
 }
 
 func (q Verse) Doc() Verse {
-	q.ID = 0
 	q.Chapter = 0
 	q.BookName = ""
 	q.VersionCode = ""

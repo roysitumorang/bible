@@ -13,6 +13,7 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/sqids/sqids-go"
 )
 
@@ -104,9 +105,11 @@ func EncodeSqIDs(numbers ...uint64) (string, error) {
 }
 
 func GenerateUniqueID() (internalID int64, externalID string, err error) {
-	internalID = snowflakeNode.Generate().Int64()
-	externalID, err = EncodeSqIDs(uint64(internalID))
-	return
+	uuidV7, err := uuid.NewV7()
+	if err != nil {
+		return
+	}
+	return snowflakeNode.Generate().Int64(), uuidV7.String(), nil
 }
 
 func GetContext(ctx context.Context, c *fiber.Ctx) context.Context {

@@ -82,14 +82,6 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 	return
 }
 
-func (q *languageQuery) BeginTx(ctx context.Context) (response pgx.Tx, err error) {
-	ctxt := "LanguageQuery-BeginTx"
-	if response, err = q.dbWrite.Begin(ctx); err != nil {
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrBegin")
-	}
-	return
-}
-
 func (q *languageQuery) SaveLanguage(ctx context.Context, tx pgx.Tx, request languageModel.Language) (response string, err error) {
 	ctxt := "LanguageQuery-SaveLanguage"
 	languageID, languageUID, err := helper.GenerateUniqueID()

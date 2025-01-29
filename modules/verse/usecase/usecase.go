@@ -13,5 +13,6 @@ type (
 		ReIndex(ctx context.Context) (err error)
 		DeleteIndex(ctx context.Context) (err error)
 		SearchVerses(ctx context.Context, filter *verseModel.Filter) (response []verseModel.Verse, err error)
+		Sync(ctx context.Context) (err error)
 	}
 )
