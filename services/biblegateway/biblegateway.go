@@ -100,7 +100,7 @@ func (q *BibleGateway) Sync(ctx context.Context, testaments []testamentModel.Tes
 	})
 	for i, language := range response {
 		for j, version := range language.Versions {
-			var builder strings.Builder
+			builder.Reset()
 			_, _ = builder.WriteString(baseURL)
 			_, _ = builder.WriteString("/versions/")
 			_, _ = builder.WriteString(version.Slug)
@@ -159,7 +159,7 @@ func (q *BibleGateway) Sync(ctx context.Context, testaments []testamentModel.Tes
 				}
 				for chunk := range slices.Chunk(chapters, 20) {
 					firstChapter := chunk[0]
-					var builder strings.Builder
+					builder.Reset()
 					_, _ = builder.WriteString(book.Name)
 					_, _ = builder.WriteString(" ")
 					_, _ = builder.WriteString(strconv.Itoa(firstChapter))
