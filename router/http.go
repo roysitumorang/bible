@@ -60,6 +60,9 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 			Rules: map[string]string{},
 		}),
 		cors.New(),
+		func(c *fiber.Ctx) error {
+			return helper.NewResponse(fiber.StatusNotFound, "", nil).WriteResponse(c)
+		},
 	)
 	v1 := r.Group("/v1")
 	languagePresenter.New(q.LanguageUseCase, q.VersionUseCase).Mount(v1.Group("/languages"))
