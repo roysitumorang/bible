@@ -3,7 +3,6 @@ package presenter
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
-	bookModel "github.com/roysitumorang/bible/modules/book/model"
 	bookUseCase "github.com/roysitumorang/bible/modules/book/usecase"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	"github.com/roysitumorang/bible/modules/verse/sanitizer"
@@ -59,21 +58,6 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
 		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
-	mapBookChaptersCount := map[string]int{}
-	if n := len(versesFilter.Books); n > 0 {
-		bookNames := make([]string, n)
-		for i, book := range versesFilter.Books {
-			bookNames[i] = book.Name
-		}
-		books, err := q.bookUseCase.FindBooks(ctx, bookModel.NewFilter(bookModel.WithNames(bookNames...)))
-		if err != nil {
-			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
-			return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
-		}
-		for _, book := range books {
-			mapBookChaptersCount[book.Name] = book.ChaptersCount
-		}
-	}
 	verses, err := q.verseUseCase.SearchVerses(ctx, versesFilter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearchVerses")
@@ -81,40 +65,32 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	}
 	mapBookChapterVerses := map[string]map[int][]verseModel.Verse{}
 	for _, verse := range verses {
-		if _, ok := mapBookChapterVerses[verse.BookName]; !ok {
-			mapBookChapterVerses[verse.BookName] = map[int][]verseModel.Verse{}
+		mapChapterVerses, ok := mapBookChapterVerses[verse.BookName]
+		if !ok {
+			mapChapterVerses = map[int][]verseModel.Verse{}
 		}
-		mapBookChapterVerses[verse.BookName][verse.Chapter] = append(mapBookChapterVerses[verse.BookName][verse.Chapter], verse.Doc())
+		mapChapterVerses[verse.Chapter] = append(mapChapterVerses[verse.Chapter], verse)
+		mapBookChapterVerses[verse.BookName] = mapChapterVerses
 	}
 	passages := make([]verseModel.Passage, len(versesFilter.Books))
 	for i, book := range versesFilter.Books {
-		chaptersCount, ok := mapBookChaptersCount[book.Name]
+		verses, ok := mapBookChapterVerses[book.Name][book.Chapter]
 		if !ok {
 			continue
 		}
-		verseNoEnd := book.VerseNoStart
-		if book.VerseNoEnd > 0 {
-			verseNoEnd = min(book.VerseNoEnd, chaptersCount)
-		}
-		var k int
-		chapters := make([]verseModel.Chapter, verseNoEnd-book.VerseNoStart+1)
-		for j := book.VerseNoStart; j <= verseNoEnd; j++ {
-			verses, ok := mapBookChapterVerses[book.Name][j]
-			if !ok {
-				verses = []verseModel.Verse{}
-			}
-			chapters[k] = verseModel.Chapter{
-				Number: j,
-				Verses: verses,
-			}
-			k++
-		}
-		passages[i] = verseModel.Passage{
+		passage := verseModel.Passage{
 			BookName:     book.Name,
+			Chapter:      book.Chapter,
 			VerseNoStart: book.VerseNoStart,
 			VerseNoEnd:   book.VerseNoEnd,
-			Chapters:     chapters,
+			Verses:       []verseModel.Verse{},
 		}
+		for _, verse := range verses {
+			if verse.Number >= book.VerseNoStart && verse.Number <= book.VerseNoEnd {
+				passage.Verses = append(passage.Verses, verse.Doc())
+			}
+		}
+		passages[i] = passage
 	}
 	r := helper.NewResponse(c, fiber.StatusOK, "")
 	response := verseModel.ReponsePassages{

@@ -44,11 +44,11 @@ type (
 	}
 
 	Passage struct {
-		BookName     string    `json:"book"`
-		Chapter      int       `json:"chapter"`
-		VerseNoStart int       `json:"verse_start"`
-		VerseNoEnd   int       `json:"verse_end"`
-		Chapters     []Chapter `json:"chapters"`
+		BookName     string  `json:"book"`
+		Chapter      int     `json:"chapter"`
+		VerseNoStart int     `json:"verse_start"`
+		VerseNoEnd   int     `json:"verse_end"`
+		Verses       []Verse `json:"verses"`
 	}
 
 	// swagger:model ResponsePassages

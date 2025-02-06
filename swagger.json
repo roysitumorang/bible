@@ -177,13 +177,6 @@
           "format": "int64",
           "x-go-name": "Chapter"
         },
-        "chapters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Chapter"
-          },
-          "x-go-name": "Chapters"
-        },
         "verse_end": {
           "type": "integer",
           "format": "int64",
@@ -193,6 +186,13 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "VerseNoStart"
+        },
+        "verses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Verse"
+          },
+          "x-go-name": "Verses"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
