@@ -149,14 +149,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 
 func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.Book) (response string, err error) {
 	ctxt := "BookQuery-SaveBook"
-	bookID, bookUID, err := helper.GenerateUniqueID()
-	if err != nil {
-		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
-		}
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
-		return
-	}
+	bookID, bookUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(
 		ctx,
 		`INSERT INTO books (

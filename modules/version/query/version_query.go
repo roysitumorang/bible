@@ -102,14 +102,7 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 
 func (q *versionQuery) SaveVersion(ctx context.Context, tx pgx.Tx, request versionModel.Version) (response string, err error) {
 	ctxt := "VersionQuery-SaveVersion"
-	versionID, versionUID, err := helper.GenerateUniqueID()
-	if err != nil {
-		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
-		}
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
-		return
-	}
+	versionID, versionUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(
 		ctx,
 		`INSERT INTO versions (

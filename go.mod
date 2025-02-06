@@ -4,21 +4,19 @@ go 1.23
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/bwmarrin/snowflake v0.3.0
 	github.com/elastic/go-elasticsearch/v8 v8.17.0
 	github.com/goccy/go-json v0.10.5
 	github.com/gofiber/contrib/fiberzap/v2 v2.1.5
 	github.com/gofiber/contrib/swagger v1.2.0
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/google/uuid v1.6.0
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.8.1
-	github.com/sqids/sqids-go v0.4.1
 	github.com/valyala/fasthttp v1.58.0
+	github.com/vishal-bihani/go-tsid v1.0.5
 	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.11.0
 )
@@ -40,6 +38,7 @@ require (
 	github.com/go-openapi/strfmt v0.23.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-openapi/validate v0.24.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect

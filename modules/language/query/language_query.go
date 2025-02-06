@@ -84,14 +84,7 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 
 func (q *languageQuery) SaveLanguage(ctx context.Context, tx pgx.Tx, request languageModel.Language) (response string, err error) {
 	ctxt := "LanguageQuery-SaveLanguage"
-	languageID, languageUID, err := helper.GenerateUniqueID()
-	if err != nil {
-		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
-		}
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
-		return
-	}
+	languageID, languageUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(
 		ctx,
 		`INSERT INTO languages (

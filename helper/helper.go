@@ -3,7 +3,6 @@ package helper
 import (
 	"context"
 	"errors"
-	"math"
 	"net/url"
 	"os"
 	"strconv"
@@ -11,25 +10,16 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/bwmarrin/snowflake"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"github.com/sqids/sqids-go"
+	"github.com/vishal-bihani/go-tsid"
 )
 
 type (
 	contextKey string
 )
 
-const (
-	letters                = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	lowerCaseAlphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
-)
-
 var (
-	snowflakeNode *snowflake.Node
-	sqIDs         *sqids.Sqids
-	timeZone      *time.Location
+	timeZone *time.Location
 	env,
 	elasticUsername,
 	elasticPassword string
@@ -37,24 +27,6 @@ var (
 	indexPassage   string
 	indexBatchSize int
 	InitHelper     = sync.OnceValue(func() (err error) {
-		if snowflakeNode, err = snowflake.NewNode(1); err != nil {
-			return
-		}
-		envSqIDsMinLength, ok := os.LookupEnv("SQIDS_MIN_LENGTH")
-		if !ok || envSqIDsMinLength == "" {
-			return errors.New("env SQIDS_MIN_LENGTH requires a positive integer")
-		}
-		sqIDsMinLength, err := strconv.Atoi(envSqIDsMinLength)
-		if err != nil {
-			return
-		}
-		sqIDs, err = sqids.New(sqids.Options{
-			Alphabet:  lowerCaseAlphanumerics,
-			MinLength: min(uint8(sqIDsMinLength), math.MaxUint8),
-		})
-		if err != nil {
-			return
-		}
 		location, ok := os.LookupEnv("TIME_ZONE")
 		if !ok || location == "" {
 			return errors.New("env TIME_ZONE is required")
@@ -103,16 +75,9 @@ func ByteSlice2String(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))
 }
 
-func EncodeSqIDs(numbers ...uint64) (string, error) {
-	return sqIDs.Encode(numbers)
-}
-
-func GenerateUniqueID() (internalID int64, externalID string, err error) {
-	uuidV7, err := uuid.NewV7()
-	if err != nil {
-		return
-	}
-	return snowflakeNode.Generate().Int64(), uuidV7.String(), nil
+func GenerateUniqueID() (internalID int64, externalID string) {
+	tsid := tsid.Fast()
+	return tsid.ToNumber(), tsid.ToLowerCase()
 }
 
 func GetContext(ctx context.Context, c *fiber.Ctx) context.Context {

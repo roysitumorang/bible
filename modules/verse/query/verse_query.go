@@ -126,14 +126,7 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 
 func (q *verseQuery) SaveVerse(ctx context.Context, tx pgx.Tx, request verseModel.Verse) (err error) {
 	ctxt := "VerseQuery-SaveVerse"
-	verseID, verseUID, err := helper.GenerateUniqueID()
-	if err != nil {
-		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			helper.Capture(ctx, zap.ErrorLevel, errRollback, ctxt, "ErrRollback")
-		}
-		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
-		return
-	}
+	verseID, verseUID := helper.GenerateUniqueID()
 	if _, err = tx.Exec(
 		ctx,
 		`INSERT INTO verses (
