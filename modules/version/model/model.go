@@ -18,40 +18,27 @@ type (
 	FilterOption func(q *Filter)
 
 	Version struct {
-		ID int64 `json:"-"`
-		// example:07py2kdb40002
-		UID         string `json:"id"`
-		LanguageUID string `json:"-"`
-		// example: 21st Century King James Version
-		Name string `json:"name"`
-		// example: KJ21
-		Code string `json:"code"`
-		// example: 21st-Century-King-James-Version-KJ21-Bible
-		Slug      string            `json:"slug"`
-		CreatedAt time.Time         `json:"-"`
-		UpdatedAt time.Time         `json:"-"`
-		Books     []*bookModel.Book `json:"books,omitempty"`
+		ID          int64             `json:"-"`
+		UID         string            `json:"id" example:"07pz6q6q80c2r"`
+		LanguageUID string            `json:"-"`
+		Name        string            `json:"name" example:"21st Century King James Version"`
+		Code        string            `json:"code" example:"KJ21"`
+		Slug        string            `json:"slug" example:"21st-Century-King-James-Version-KJ21-Bible"`
+		CreatedAt   time.Time         `json:"-"`
+		UpdatedAt   time.Time         `json:"-"`
+		Books       []*bookModel.Book `json:"books,omitempty"`
 	}
 
-	// swagger:model ResponseVersion
 	ResponseVersion struct {
-		// example: 2bebf1ec-40e1-4037-9660-d3397594f6bc
-		RequestID string `json:"request_id"`
-		// example: GET http://localhost:18000/v1/versions/07py2kdb40002
-		RequestURL string `json:"request_url"`
-		// example: 200
-		StatusCode int `json:"status_code"`
-		// example:
-		Message string `json:"message,omitempty"`
-		// example: OK
-		Status string `json:"status"`
-		// example: 2025-02-06T13:44:22.460901389+07:00
-		Timestamp time.Time `json:"timestamp"`
-		// example: 11.112834ms
-		Latency string   `json:"latency"`
-		Data    *Version `json:"data,omitempty"`
-		// example: bible
-		App string `json:"app"`
+		RequestID  string    `json:"request_id" example:"c6e430c5-21a5-45bf-aca2-36ae06c1a45d"`
+		RequestURL string    `json:"request_url" example:"GET http://localhost:18000/v1/versions/07pz6q6q80c2r"`
+		StatusCode int       `json:"status_code" example:"200"`
+		Message    string    `json:"message,omitempty" example:""`
+		Status     string    `json:"status" example:"OK"`
+		Timestamp  time.Time `json:"timestamp" example:"2025-02-06T16:49:47.815304721+07:00"`
+		Latency    string    `json:"latency" example:"17.306935ms"`
+		Data       *Version  `json:"data,omitempty"`
+		App        string    `json:"app" example:"bible"`
 	}
 )
 

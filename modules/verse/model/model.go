@@ -25,61 +25,41 @@ type (
 	}
 
 	Verse struct {
-		ID int64 `json:"-"`
-		// example: 07py2kdcg0004
-		UID     string `json:"id"`
-		BookUID string `json:"-"`
-		// example: 1
-		Chapter int `json:"chapter_no,omitempty"`
-		// example: 1
-		Number int `json:"verse_no"`
-		// example: In the beginning God created the heaven and the earth.
-		Body      string    `json:"body"`
-		CreatedAt time.Time `json:"-"`
-		UpdatedAt time.Time `json:"-"`
-		// example: Genesis
-		BookName string `json:"book,omitempty"`
-		// example: KJ21
-		VersionCode string `json:"version,omitempty"`
+		ID          int64     `json:"-"`
+		UID         string    `json:"id" example:"07py2kdcg0004"`
+		BookUID     string    `json:"-"`
+		Chapter     int       `json:"chapter_no,omitempty" example:"1"`
+		Number      int       `json:"verse_no" example:"1"`
+		Body        string    `json:"body" example:"In the beginning God created the heaven and the earth."`
+		CreatedAt   time.Time `json:"-"`
+		UpdatedAt   time.Time `json:"-"`
+		BookName    string    `json:"book,omitempty" example:"Genesis"`
+		VersionCode string    `json:"version,omitempty" example:"KJ21"`
 	}
 
 	Chapter struct {
-		// example: 1
 		Number int     `json:"number"`
 		Verses []Verse `json:"verses"`
 	}
 
 	Passage struct {
-		// example: Genesis
-		BookName string `json:"book"`
-		// example: 1
-		Chapter int `json:"chapter"`
-		// example: 1
-		VerseNoStart int `json:"verse_start"`
-		// example: 20
-		VerseNoEnd int     `json:"verse_end"`
-		Verses     []Verse `json:"verses"`
+		BookName     string  `json:"book" example:"Genesis"`
+		Chapter      int     `json:"chapter" example:"1"`
+		VerseNoStart int     `json:"verse_start" example:"1"`
+		VerseNoEnd   int     `json:"verse_end" example:"20"`
+		Verses       []Verse `json:"verses"`
 	}
 
-	// swagger:model ResponsePassages
 	ResponsePassages struct {
-		// example: 2aebf1ec-40e1-4037-9660-d3397594f6bc
-		RequestID string `json:"request_id"`
-		// example: GET http://localhost:18000/v1/verses?version=KJ21&q=Genesis+1:1-20;Exodus+2:1-20
-		RequestURL string `json:"request_url"`
-		// example: 200
-		StatusCode int `json:"status_code"`
-		// example:
-		Message string `json:"message,omitempty"`
-		// example: OK
-		Status string `json:"status"`
-		// example: 2025-02-06T13:40:53.144679821+07:00
-		Timestamp time.Time `json:"timestamp"`
-		// example: 106.403552ms
-		Latency string    `json:"latency"`
-		Data    []Passage `json:"data"`
-		// example: bible
-		App string `json:"app"`
+		RequestID  string    `json:"request_id" example:"60068eaa-1f89-4e31-80a5-66cc133e86fc"`
+		RequestURL string    `json:"request_url" example:"GET http://localhost:18000/v1/verses?version=KJ21&q=Genesis+1:1-20;Exodus+2:1-20"`
+		StatusCode int       `json:"status_code" example:"200"`
+		Message    string    `json:"message,omitempty" example:""`
+		Status     string    `json:"status" example:"OK"`
+		Timestamp  time.Time `json:"timestamp" example:"2025-02-06T16:52:34.01591064+07:00"`
+		Latency    string    `json:"latency" example:"110.247731ms"`
+		Data       []Passage `json:"data"`
+		App        string    `json:"app" example:"bible"`
 	}
 )
 

@@ -31,25 +31,16 @@ func (q *verseHTTPHandler) Mount(r fiber.Router) {
 	r.Get("", q.FindVerses)
 }
 
-// swagger:operation GET /verses Verse FindVerses
-// Get verses
-// ---
-// produces:
-//   - "application/json"
-// parameters:
-//   - name: version
-//     in: query
-//     required: true
-//     type: string
-//   - name: q
-//     in: query
-//     required: true
-//     type: string
-// responses:
-//   200:
-//     description: "successful operation"
-//     schema:
-//       $ref: "#/definitions/ResponsePassages"
+// @Summary		Finding verses
+// @Description	finding verses
+// @Tags			Verse
+// @ID				FindVerses
+// @Accept			json
+// @Produce		json
+// @Param			version	query		string	true	"Version code"
+// @Param			q		query		string	true	"BookName chapterNo:verseNoStart-verseNoEnd"
+// @Success		200		{object}	model.ResponsePassages
+// @Router			/verses [get]
 func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "VersePresenter-FindVerses"

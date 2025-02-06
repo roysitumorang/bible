@@ -12,7 +12,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/contrib/fiberzap/v2"
-	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -22,11 +21,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/rewrite"
 	"github.com/joho/godotenv"
 	"github.com/roysitumorang/bible/config"
+	_ "github.com/roysitumorang/bible/docs"
 	"github.com/roysitumorang/bible/helper"
 	"github.com/roysitumorang/bible/middleware"
 	languagePresenter "github.com/roysitumorang/bible/modules/language/presenter"
 	versePresenter "github.com/roysitumorang/bible/modules/verse/presenter"
 	versionPresenter "github.com/roysitumorang/bible/modules/version/presenter"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"go.uber.org/zap"
 )
 
@@ -63,13 +64,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 		cors.New(),
 	)
 	if helper.GetEnv() == "development" {
-		app.Use(swagger.New(swagger.Config{
-			BasePath: "/",
-			FilePath: "./swagger.json",
-			Path:     "docs",
-			Title:    "API documentation",
-			CacheAge: 0,
-		}))
+		app.Get("/swagger/*", fiberSwagger.WrapHandler, middleware.BasicAuth())
 	}
 	v1 := app.Group("/v1")
 	languagePresenter.New(q.LanguageUseCase, q.VersionUseCase).Mount(v1.Group("/languages"))

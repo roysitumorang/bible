@@ -1,0 +1,242 @@
+basePath: /v1
+consumes:
+- application/json
+definitions:
+  github_com_roysitumorang_bible_modules_book_model.Book:
+    properties:
+      chapters:
+        items:
+          $ref: '#/definitions/github_com_roysitumorang_bible_modules_book_model.Chapter'
+        type: array
+      id:
+        example: 07pz6q6qc0c2s
+        type: string
+      name:
+        example: Genesis
+        type: string
+    type: object
+  github_com_roysitumorang_bible_modules_book_model.Chapter:
+    properties:
+      link:
+        example: http://localhost:18000/v1/verses?q=Genesis+1&version=KJ21
+        type: string
+      number:
+        example: 1
+        type: integer
+    type: object
+  model.Language:
+    properties:
+      code:
+        example: EN
+        type: string
+      id:
+        example: 07pz6q6q80c2q
+        type: string
+      name:
+        example: English
+        type: string
+      versions:
+        items:
+          $ref: '#/definitions/model.Version'
+        type: array
+    type: object
+  model.Passage:
+    properties:
+      book:
+        example: Genesis
+        type: string
+      chapter:
+        example: 1
+        type: integer
+      verse_end:
+        example: 20
+        type: integer
+      verse_start:
+        example: 1
+        type: integer
+      verses:
+        items:
+          $ref: '#/definitions/model.Verse'
+        type: array
+    type: object
+  model.ResponseLanguages:
+    properties:
+      app:
+        example: bible
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/model.Language'
+        type: array
+      latency:
+        example: 7.746177ms
+        type: string
+      message:
+        example: ""
+        type: string
+      request_id:
+        example: add11106-20af-40c2-becb-d1a063e00e77
+        type: string
+      request_url:
+        example: GET http://localhost:18000/v1/languages
+        type: string
+      status:
+        example: OK
+        type: string
+      status_code:
+        example: 200
+        type: integer
+      timestamp:
+        example: "2025-02-06T16:44:47.444931371+07:00"
+        type: string
+    type: object
+  model.ResponsePassages:
+    properties:
+      app:
+        example: bible
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/model.Passage'
+        type: array
+      latency:
+        example: 110.247731ms
+        type: string
+      message:
+        example: ""
+        type: string
+      request_id:
+        example: 60068eaa-1f89-4e31-80a5-66cc133e86fc
+        type: string
+      request_url:
+        example: GET http://localhost:18000/v1/verses?version=KJ21&q=Genesis+1:1-20;Exodus+2:1-20
+        type: string
+      status:
+        example: OK
+        type: string
+      status_code:
+        example: 200
+        type: integer
+      timestamp:
+        example: "2025-02-06T16:52:34.01591064+07:00"
+        type: string
+    type: object
+  model.Verse:
+    properties:
+      body:
+        example: In the beginning God created the heaven and the earth.
+        type: string
+      book:
+        example: Genesis
+        type: string
+      chapter_no:
+        example: 1
+        type: integer
+      id:
+        example: 07py2kdcg0004
+        type: string
+      verse_no:
+        example: 1
+        type: integer
+      version:
+        example: KJ21
+        type: string
+    type: object
+  model.Version:
+    properties:
+      books:
+        items:
+          $ref: '#/definitions/github_com_roysitumorang_bible_modules_book_model.Book'
+        type: array
+      code:
+        example: KJ21
+        type: string
+      id:
+        example: 07pz6q6q80c2r
+        type: string
+      name:
+        example: 21st Century King James Version
+        type: string
+      slug:
+        example: 21st-Century-King-James-Version-KJ21-Bible
+        type: string
+    type: object
+info:
+  contact:
+    email: roy.situmorang@gmail.com
+    name: Roy Situmorang
+  description: This is documentation of Bible API.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Bible API
+  version: 0.1.0
+paths:
+  /languages:
+    get:
+      consumes:
+      - application/json
+      description: finding languages
+      operationId: FindLanguages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ResponseLanguages'
+      summary: Finding languages
+      tags:
+      - Language
+  /verses:
+    get:
+      consumes:
+      - application/json
+      description: finding verses
+      operationId: FindVerses
+      parameters:
+      - description: Version code
+        in: query
+        name: version
+        required: true
+        type: string
+      - description: BookName chapterNo:verseNoStart-verseNoEnd
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ResponsePassages'
+      summary: Finding verses
+      tags:
+      - Verse
+  /version/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: finding version by UID
+      operationId: FindVersion
+      parameters:
+      - description: Version UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ResponsePassages'
+      summary: Finding version by UID
+      tags:
+      - Version
+produces:
+- application/json
+swagger: "2.0"

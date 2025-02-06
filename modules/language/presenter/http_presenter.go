@@ -31,17 +31,14 @@ func (q *languageHTTPHandler) Mount(r fiber.Router) {
 	r.Get("", q.FindLanguages)
 }
 
-// swagger:operation GET /languages Language FindLanguages
-// Get languages
-// ---
-// produces:
-//   - "application/json"
-// parameters:
-// responses:
-//   200:
-//     description: "successful operation"
-//     schema:
-//       $ref: "#/definitions/ResponseLanguages"
+// @Summary		Finding languages
+// @Description	finding languages
+// @Tags			Language
+// @ID				FindLanguages
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	model.ResponseLanguages
+// @Router			/languages [get]
 func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "LanguagePresenter-FindLanguages"

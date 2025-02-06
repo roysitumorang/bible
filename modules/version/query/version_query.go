@@ -80,7 +80,7 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 	defer rows.Close()
 	var i int
 	for rows.Next() {
-		version := response[i]
+		var version versionModel.Version
 		if err = rows.Scan(
 			&version.ID,
 			&version.UID,
@@ -94,7 +94,7 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
 			return
 		}
-		response[i] = version
+		response[i] = &version
 		i++
 	}
 	return

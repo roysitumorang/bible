@@ -105,7 +105,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 	var i int
 	for rows.Next() {
 		var (
-			book        = response[i]
+			book        bookModel.Book
 			versionCode string
 		)
 		if err = rows.Scan(
@@ -141,7 +141,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 			chapter.Link = builder.String()
 			book.Chapters[j] = chapter
 		}
-		response[i] = book
+		response[i] = &book
 		i++
 	}
 	return

@@ -18,4 +18,5 @@ stop:
 	@-lsof -t -i :$(PORT_HTTP) | xargs --no-run-if-empty kill
 
 doc:
-	@rm -f ./swagger.json && swagger generate spec -o ./swagger.json --scan-models
+	@echo Starting swagger generating
+	@swag fmt -d ./ --exclude ./docs && swag init -g *.go

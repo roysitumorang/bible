@@ -33,21 +33,15 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 	r.Get("/:uid", q.FindVersion)
 }
 
-// swagger:operation GET /versions/{versionUid} Version FindVersion
-// Get version by UID
-// ---
-// produces:
-//   - "application/json"
-// parameters:
-//   - name: versionUid
-//     in: path
-//     required: true
-//     type: string
-// responses:
-//   200:
-//     description: "successful operation"
-//     schema:
-//       $ref: "#/definitions/ResponseVersion"
+// @Summary		Finding version by UID
+// @Description	finding version by UID
+// @Tags			Version
+// @ID				FindVersion
+// @Accept			json
+// @Produce		json
+// @Param			uid	path		string	true	"Version UID"
+// @Success		200	{object}	model.ResponsePassages
+// @Router			/version/{uid} [get]
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "VersionPresenter-FindVersion"

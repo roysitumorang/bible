@@ -1,12 +1,18 @@
-// Bible API
-//  version: 0.1.0
-//  title: Bible API
-// schemes: http, https
-// host:
-// basePath: /v1
-// produces:
-// - application/json
-// swagger:meta
+//	@title			Bible API
+//	@version		0.1.0
+//	@description	This is documentation of Bible API.
+
+//	@contact.name	Roy Situmorang
+//	@contact.email	roy.situmorang@gmail.com
+
+//	@license.name	MIT
+//	@license.url	https://opensource.org/licenses/MIT
+
+//	@host
+//	@BasePath	/v1
+
+// @accept		json
+// @produce	json
 package main
 
 import (
