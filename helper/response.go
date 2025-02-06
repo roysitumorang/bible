@@ -14,15 +14,15 @@ const (
 
 type (
 	Response struct {
-		RequestID  string      `json:"request_id"`
-		RequestURL string      `json:"request_url"`
-		StatusCode int         `json:"status_code"`
-		Message    string      `json:"message,omitempty"`
-		Status     string      `json:"status"`
-		Timestamp  time.Time   `json:"timestamp"`
-		Latency    string      `json:"latency"`
+		RequestID  string      `json:"request_id" example:"add11106-20af-40c2-becb-d1a063e00e77"`
+		RequestURL string      `json:"request_url" example:"GET http://localhost:18000/v1/languages"`
+		StatusCode int         `json:"status_code" example:"200"`
+		Message    string      `json:"message,omitempty" example:""`
+		Status     string      `json:"status" example:"OK"`
+		Timestamp  time.Time   `json:"timestamp" example:"2025-02-06T16:44:47.444931371+07:00"`
+		Latency    string      `json:"latency" example:"7.746177ms"`
 		Data       interface{} `json:"data,omitempty"`
-		App        string      `json:"app"`
+		App        string      `json:"app" example:"bible"`
 	}
 )
 
@@ -32,6 +32,7 @@ func NewResponse(statusCode int, message string, data interface{}) *Response {
 		Message:    message,
 		Status:     http.StatusText(statusCode),
 		Timestamp:  time.Now(),
+		Data:       data,
 		App:        APP,
 	}
 }

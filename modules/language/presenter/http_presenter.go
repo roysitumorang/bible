@@ -37,20 +37,21 @@ func (q *languageHTTPHandler) Mount(r fiber.Router) {
 // @ID				FindLanguages
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	model.ResponseLanguages
+// @Success		200	{object}	helper.Response{data=[]languageModel.Language}
 // @Router			/languages [get]
 func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "LanguagePresenter-FindLanguages"
+	_ = languageModel.Language{}
 	languages, err := q.languageUseCase.FindLanguages(ctx)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindLanguages")
-		return languageModel.NewResponseLanguages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	versions, err := q.versionUseCase.FindVersions(ctx, nil)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return languageModel.NewResponseLanguages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	mapLanguageVersions := map[string][]*versionModel.Version{}
 	for _, version := range versions {
@@ -62,5 +63,5 @@ func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 		}
 		languages[i] = language
 	}
-	return languageModel.NewResponseLanguages(fiber.StatusOK, "", languages).WriteResponse(c)
+	return helper.NewResponse(fiber.StatusOK, "", languages).WriteResponse(c)
 }

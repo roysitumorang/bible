@@ -46,7 +46,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponseLanguages"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.Language"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -86,7 +101,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponsePassages"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.Passage"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -119,7 +149,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponseVersion"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Version"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -156,6 +198,44 @@ const docTemplate = `{
                 "number": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "helper.Response": {
+            "type": "object",
+            "properties": {
+                "app": {
+                    "type": "string",
+                    "example": "bible"
+                },
+                "data": {},
+                "latency": {
+                    "type": "string",
+                    "example": "7.746177ms"
+                },
+                "message": {
+                    "type": "string",
+                    "example": ""
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "add11106-20af-40c2-becb-d1a063e00e77"
+                },
+                "request_url": {
+                    "type": "string",
+                    "example": "GET http://localhost:18000/v1/languages"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2025-02-06T16:44:47.444931371+07:00"
                 }
             }
         },
@@ -206,132 +286,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.Verse"
                     }
-                }
-            }
-        },
-        "model.ResponseLanguages": {
-            "type": "object",
-            "properties": {
-                "app": {
-                    "type": "string",
-                    "example": "bible"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Language"
-                    }
-                },
-                "latency": {
-                    "type": "string",
-                    "example": "7.746177ms"
-                },
-                "message": {
-                    "type": "string",
-                    "example": ""
-                },
-                "request_id": {
-                    "type": "string",
-                    "example": "add11106-20af-40c2-becb-d1a063e00e77"
-                },
-                "request_url": {
-                    "type": "string",
-                    "example": "GET http://localhost:18000/v1/languages"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "OK"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2025-02-06T16:44:47.444931371+07:00"
-                }
-            }
-        },
-        "model.ResponsePassages": {
-            "type": "object",
-            "properties": {
-                "app": {
-                    "type": "string",
-                    "example": "bible"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Passage"
-                    }
-                },
-                "latency": {
-                    "type": "string",
-                    "example": "110.247731ms"
-                },
-                "message": {
-                    "type": "string",
-                    "example": ""
-                },
-                "request_id": {
-                    "type": "string",
-                    "example": "60068eaa-1f89-4e31-80a5-66cc133e86fc"
-                },
-                "request_url": {
-                    "type": "string",
-                    "example": "GET http://localhost:18000/v1/verses?version=KJ21\u0026q=Genesis+1:1-20;Exodus+2:1-20"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "OK"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2025-02-06T16:52:34.01591064+07:00"
-                }
-            }
-        },
-        "model.ResponseVersion": {
-            "type": "object",
-            "properties": {
-                "app": {
-                    "type": "string",
-                    "example": "bible"
-                },
-                "data": {
-                    "$ref": "#/definitions/model.Version"
-                },
-                "latency": {
-                    "type": "string",
-                    "example": "17.306935ms"
-                },
-                "message": {
-                    "type": "string",
-                    "example": ""
-                },
-                "request_id": {
-                    "type": "string",
-                    "example": "c6e430c5-21a5-45bf-aca2-36ae06c1a45d"
-                },
-                "request_url": {
-                    "type": "string",
-                    "example": "GET http://localhost:18000/v1/versions/07pz6q6q80c2r"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "OK"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2025-02-06T16:49:47.815304721+07:00"
                 }
             }
         },

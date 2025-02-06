@@ -40,7 +40,7 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 // @Accept			json
 // @Produce		json
 // @Param			uid	path		string	true	"Version UID"
-// @Success		200	{object}	model.ResponseVersion
+// @Success		200	{object}	helper.Response{data=versionModel.Version}
 // @Router			/versions/{uid} [get]
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := c.UserContext()
@@ -53,10 +53,10 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	versions, err := q.versionUseCase.FindVersions(ctx, filter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return versionModel.NewResponseVersion(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	if len(versions) == 0 {
-		return versionModel.NewResponseVersion(fiber.StatusNotFound, "version not found", nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusNotFound, "version not found", nil).WriteResponse(c)
 	}
 	version := versions[0]
 	if version.Books, err = q.bookUseCase.FindBooks(
@@ -67,7 +67,7 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 		),
 	); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
-		return versionModel.NewResponseVersion(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
-	return versionModel.NewResponseVersion(fiber.StatusOK, "", version).WriteResponse(c)
+	return helper.NewResponse(fiber.StatusOK, "", version).WriteResponse(c)
 }

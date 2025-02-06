@@ -23,7 +23,7 @@ func New(
 	}
 }
 
-func (q *languageUseCase) FindLanguages(ctx context.Context) (response []languageModel.Language, err error) {
+func (q *languageUseCase) FindLanguages(ctx context.Context) (response []*languageModel.Language, err error) {
 	ctxt := "LanguageUseCase-FindLanguages"
 	if response, err = q.languageQuery.FindLanguages(ctx); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindLanguages")

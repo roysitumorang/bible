@@ -29,9 +29,9 @@ func New(
 	}
 }
 
-func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageModel.Language, err error) {
+func (q *languageQuery) FindLanguages(ctx context.Context) (response []*languageModel.Language, err error) {
 	ctxt := "LanguageQuery-FindLanguages"
-	response = make([]languageModel.Language, 0)
+	response = make([]*languageModel.Language, 0)
 	var count int
 	if err = q.dbRead.QueryRow(ctx, "SELECT COUNT(1) FROM languages").Scan(&count); err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
@@ -40,7 +40,7 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 	if count == 0 {
 		return
 	}
-	response = make([]languageModel.Language, count)
+	response = make([]*languageModel.Language, count)
 	rows, err := q.dbRead.Query(
 		ctx,
 		`SELECT
@@ -63,8 +63,9 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 	defer rows.Close()
 	var i int
 	for rows.Next() {
-		language := response[i]
-		language.Versions = make([]*versionModel.Version, 0)
+		language := languageModel.Language{
+			Versions: make([]*versionModel.Version, 0),
+		}
 		if err = rows.Scan(
 			&language.ID,
 			&language.UID,
@@ -76,7 +77,7 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrScan")
 			return
 		}
-		response[i] = language
+		response[i] = &language
 		i++
 	}
 	return

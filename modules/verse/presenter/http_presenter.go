@@ -39,7 +39,7 @@ func (q *verseHTTPHandler) Mount(r fiber.Router) {
 // @Produce		json
 // @Param			version	query		string	true	"Version code"
 // @Param			q		query		string	true	"BookName chapterNo:verseNoStart-verseNoEnd"
-// @Success		200		{object}	model.ResponsePassages
+// @Success		200		{object}	helper.Response{data=[]verseModel.Passage}
 // @Router			/verses [get]
 func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	ctx := c.UserContext()
@@ -47,12 +47,12 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	versesFilter, err := sanitizer.FindVerses(ctx, c)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
-		return verseModel.NewResponsePassages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	verses, err := q.verseUseCase.SearchVerses(ctx, versesFilter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearchVerses")
-		return verseModel.NewResponsePassages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	mapBookChapterVerses := map[string]map[int][]verseModel.Verse{}
 	for _, verse := range verses {
@@ -83,5 +83,5 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		}
 		passages[i] = passage
 	}
-	return verseModel.NewResponsePassages(fiber.StatusOK, "", passages).WriteResponse(c)
+	return helper.NewResponse(fiber.StatusOK, "", passages).WriteResponse(c)
 }

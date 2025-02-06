@@ -8,6 +8,6 @@ import (
 
 type (
 	LanguageUseCase interface {
-		FindLanguages(ctx context.Context) (response []languageModel.Language, err error)
+		FindLanguages(ctx context.Context) (response []*languageModel.Language, err error)
 	}
 )
