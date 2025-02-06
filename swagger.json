@@ -110,7 +110,7 @@
         "id": {
           "type": "string",
           "x-go-name": "UID",
-          "example": "0194d944-2959-77d5-a69e-a0ffb9fa3f5b"
+          "example": "07py2kdcc0003"
         },
         "name": {
           "type": "string",
@@ -148,7 +148,7 @@
         "id": {
           "type": "string",
           "x-go-name": "UID",
-          "example": "0194d944-2954-7a1a-97f4-707afa02238b"
+          "example": "07py2kdaw0001"
         },
         "name": {
           "type": "string",
@@ -170,22 +170,26 @@
       "properties": {
         "book": {
           "type": "string",
-          "x-go-name": "BookName"
+          "x-go-name": "BookName",
+          "example": "Genesis"
         },
         "chapter": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "Chapter"
+          "x-go-name": "Chapter",
+          "example": 1
         },
         "verse_end": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "VerseNoEnd"
+          "x-go-name": "VerseNoEnd",
+          "example": 20
         },
         "verse_start": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "VerseNoStart"
+          "x-go-name": "VerseNoStart",
+          "example": 1
         },
         "verses": {
           "type": "array",
@@ -202,7 +206,8 @@
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App"
+          "x-go-name": "App",
+          "example": "bible"
         },
         "data": {
           "type": "array",
@@ -213,7 +218,8 @@
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency"
+          "x-go-name": "Latency",
+          "example": "20.06289ms"
         },
         "message": {
           "type": "string",
@@ -221,25 +227,30 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID"
+          "x-go-name": "RequestID",
+          "example": "28ebf1ec-40e1-4037-9660-d3397594f6bc"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL"
+          "x-go-name": "RequestURL",
+          "example": "GET http://localhost:18000/v1/languages"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status"
+          "x-go-name": "Status",
+          "example": "OK"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode"
+          "x-go-name": "StatusCode",
+          "example": 200
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp"
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T13:36:54.822354385+07:00"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/language/model"
@@ -249,7 +260,8 @@
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App"
+          "x-go-name": "App",
+          "example": "bible"
         },
         "data": {
           "type": "array",
@@ -260,7 +272,8 @@
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency"
+          "x-go-name": "Latency",
+          "example": "106.403552ms"
         },
         "message": {
           "type": "string",
@@ -268,25 +281,30 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID"
+          "x-go-name": "RequestID",
+          "example": "2aebf1ec-40e1-4037-9660-d3397594f6bc"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL"
+          "x-go-name": "RequestURL",
+          "example": "GET http://localhost:18000/v1/verses?version=KJ21\u0026q=Genesis+1:1-20;Exodus+2:1-20"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status"
+          "x-go-name": "Status",
+          "example": "OK"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode"
+          "x-go-name": "StatusCode",
+          "example": 200
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp"
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T13:40:53.144679821+07:00"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
@@ -296,14 +314,16 @@
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App"
+          "x-go-name": "App",
+          "example": "bible"
         },
         "data": {
           "$ref": "#/definitions/Version"
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency"
+          "x-go-name": "Latency",
+          "example": "11.112834ms"
         },
         "message": {
           "type": "string",
@@ -311,25 +331,30 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID"
+          "x-go-name": "RequestID",
+          "example": "2bebf1ec-40e1-4037-9660-d3397594f6bc"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL"
+          "x-go-name": "RequestURL",
+          "example": "GET http://localhost:18000/v1/versions/07py2kdb40002"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status"
+          "x-go-name": "Status",
+          "example": "OK"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode"
+          "x-go-name": "StatusCode",
+          "example": 200
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp"
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T13:44:22.460901389+07:00"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/version/model"
@@ -344,17 +369,19 @@
         },
         "book": {
           "type": "string",
-          "x-go-name": "BookName"
+          "x-go-name": "BookName",
+          "example": "Genesis"
         },
         "chapter_no": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "Chapter"
+          "x-go-name": "Chapter",
+          "example": 1
         },
         "id": {
           "type": "string",
           "x-go-name": "UID",
-          "example": "0194b25b-bb70-7385-a6c4-bd4a748b7064"
+          "example": "07py2kdcg0004"
         },
         "verse_no": {
           "type": "integer",
@@ -364,7 +391,8 @@
         },
         "version": {
           "type": "string",
-          "x-go-name": "VersionCode"
+          "x-go-name": "VersionCode",
+          "example": "KJ21"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
@@ -387,7 +415,7 @@
         "id": {
           "type": "string",
           "x-go-name": "UID",
-          "example": "0194d944-2957-7215-8f15-2b12282fa896"
+          "example": "07py2kdb40002"
         },
         "name": {
           "type": "string",

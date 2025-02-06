@@ -26,18 +26,21 @@ type (
 
 	Verse struct {
 		ID int64 `json:"-"`
-		// example: 0194b25b-bb70-7385-a6c4-bd4a748b7064
+		// example: 07py2kdcg0004
 		UID     string `json:"id"`
 		BookUID string `json:"-"`
-		Chapter int    `json:"chapter_no,omitempty"`
+		// example: 1
+		Chapter int `json:"chapter_no,omitempty"`
 		// example: 1
 		Number int `json:"verse_no"`
 		// example: In the beginning God created the heaven and the earth.
-		Body        string    `json:"body"`
-		CreatedAt   time.Time `json:"-"`
-		UpdatedAt   time.Time `json:"-"`
-		BookName    string    `json:"book,omitempty"`
-		VersionCode string    `json:"version,omitempty"`
+		Body      string    `json:"body"`
+		CreatedAt time.Time `json:"-"`
+		UpdatedAt time.Time `json:"-"`
+		// example: Genesis
+		BookName string `json:"book,omitempty"`
+		// example: KJ21
+		VersionCode string `json:"version,omitempty"`
 	}
 
 	Chapter struct {
@@ -47,24 +50,36 @@ type (
 	}
 
 	Passage struct {
-		BookName     string  `json:"book"`
-		Chapter      int     `json:"chapter"`
-		VerseNoStart int     `json:"verse_start"`
-		VerseNoEnd   int     `json:"verse_end"`
-		Verses       []Verse `json:"verses"`
+		// example: Genesis
+		BookName string `json:"book"`
+		// example: 1
+		Chapter int `json:"chapter"`
+		// example: 1
+		VerseNoStart int `json:"verse_start"`
+		// example: 20
+		VerseNoEnd int     `json:"verse_end"`
+		Verses     []Verse `json:"verses"`
 	}
 
 	// swagger:model ResponsePassages
 	ResponsePassages struct {
-		RequestID  string    `json:"request_id"`
-		RequestURL string    `json:"request_url"`
-		StatusCode int       `json:"status_code"`
-		Message    string    `json:"message,omitempty"`
-		Status     string    `json:"status"`
-		Timestamp  time.Time `json:"timestamp"`
-		Latency    string    `json:"latency"`
-		Data       []Passage `json:"data"`
-		App        string    `json:"app"`
+		// example: 2aebf1ec-40e1-4037-9660-d3397594f6bc
+		RequestID string `json:"request_id"`
+		// example: GET http://localhost:18000/v1/verses?version=KJ21&q=Genesis+1:1-20;Exodus+2:1-20
+		RequestURL string `json:"request_url"`
+		// example: 200
+		StatusCode int `json:"status_code"`
+		// example:
+		Message string `json:"message,omitempty"`
+		// example: OK
+		Status string `json:"status"`
+		// example: 2025-02-06T13:40:53.144679821+07:00
+		Timestamp time.Time `json:"timestamp"`
+		// example: 106.403552ms
+		Latency string    `json:"latency"`
+		Data    []Passage `json:"data"`
+		// example: bible
+		App string `json:"app"`
 	}
 )
 

@@ -17,7 +17,7 @@ type (
 
 	Book struct {
 		ID int64 `json:"-"`
-		// example: 0194d944-2959-77d5-a69e-a0ffb9fa3f5b
+		// example: 07py2kdcc0003
 		UID        string `json:"id"`
 		Testament  string `json:"-"`
 		VersionUID string `json:"-"`

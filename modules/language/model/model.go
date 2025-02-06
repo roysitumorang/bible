@@ -13,7 +13,7 @@ import (
 type (
 	Language struct {
 		ID int64 `json:"-"`
-		// example: 0194d944-2954-7a1a-97f4-707afa02238b
+		// example: 07py2kdaw0001
 		UID string `json:"id"`
 		// example: English
 		Name string `json:"name"`
@@ -26,15 +26,23 @@ type (
 
 	// swagger:model ResponseLanguages
 	ResponseLanguages struct {
-		RequestID  string     `json:"request_id"`
-		RequestURL string     `json:"request_url"`
-		StatusCode int        `json:"status_code"`
-		Message    string     `json:"message,omitempty"`
-		Status     string     `json:"status"`
-		Timestamp  time.Time  `json:"timestamp"`
-		Latency    string     `json:"latency"`
-		Data       []Language `json:"data"`
-		App        string     `json:"app"`
+		// example: 28ebf1ec-40e1-4037-9660-d3397594f6bc
+		RequestID string `json:"request_id"`
+		// example: GET http://localhost:18000/v1/languages
+		RequestURL string `json:"request_url"`
+		// example: 200
+		StatusCode int `json:"status_code"`
+		// example:
+		Message string `json:"message,omitempty"`
+		// example: OK
+		Status string `json:"status"`
+		// example: 2025-02-06T13:36:54.822354385+07:00
+		Timestamp time.Time `json:"timestamp"`
+		// example: 20.06289ms
+		Latency string     `json:"latency"`
+		Data    []Language `json:"data"`
+		// example: bible
+		App string `json:"app"`
 	}
 )
 
