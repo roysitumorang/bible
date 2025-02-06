@@ -8,6 +8,6 @@ import (
 
 type (
 	BookUseCase interface {
-		FindBooks(ctx context.Context, filter *bookModel.Filter) (response []bookModel.Book, err error)
+		FindBooks(ctx context.Context, filter *bookModel.Filter) (response []*bookModel.Book, err error)
 	}
 )

@@ -64,7 +64,7 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 	var i int
 	for rows.Next() {
 		language := response[i]
-		language.Versions = make([]versionModel.Version, 0)
+		language.Versions = make([]*versionModel.Version, 0)
 		if err = rows.Scan(
 			&language.ID,
 			&language.UID,
@@ -82,7 +82,7 @@ func (q *languageQuery) FindLanguages(ctx context.Context) (response []languageM
 	return
 }
 
-func (q *languageQuery) SaveLanguage(ctx context.Context, tx pgx.Tx, request languageModel.Language) (response string, err error) {
+func (q *languageQuery) SaveLanguage(ctx context.Context, tx pgx.Tx, request *languageModel.Language) (response string, err error) {
 	ctxt := "LanguageQuery-SaveLanguage"
 	languageID, languageUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(

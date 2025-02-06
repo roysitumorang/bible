@@ -8,6 +8,6 @@ import (
 
 type (
 	VersionUseCase interface {
-		FindVersions(ctx context.Context, filter *versionModel.Filter) (response []versionModel.Version, err error)
+		FindVersions(ctx context.Context, filter *versionModel.Filter) (response []*versionModel.Version, err error)
 	}
 )

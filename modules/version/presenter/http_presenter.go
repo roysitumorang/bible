@@ -75,5 +75,5 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
 		return versionModel.NewResponseVersion(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
-	return versionModel.NewResponseVersion(fiber.StatusOK, "", &version).WriteResponse(c)
+	return versionModel.NewResponseVersion(fiber.StatusOK, "", version).WriteResponse(c)
 }

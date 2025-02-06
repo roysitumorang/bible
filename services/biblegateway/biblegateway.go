@@ -33,7 +33,7 @@ func New() *BibleGateway {
 	return &BibleGateway{}
 }
 
-func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Language, err error) {
+func (q *BibleGateway) Sync(ctx context.Context) (response []*languageModel.Language, err error) {
 	ctxt := "BibleGateway-Sync"
 	var builder strings.Builder
 	_, _ = builder.WriteString(baseURL)
@@ -76,7 +76,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Langu
 				if versionCode == "KJ21" || versionCode == "ERV" {
 					language.Versions = append(
 						language.Versions,
-						versionModel.Version{
+						&versionModel.Version{
 							Name: versionName,
 							Code: versionCode,
 							Slug: strings.TrimSuffix(strings.TrimPrefix(versionSlug, "/versions/"), "/#booklist"),
@@ -86,7 +86,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Langu
 			}
 		})
 		if language.Code == "EN" && len(language.Versions) > 0 {
-			response = append(response, language)
+			response = append(response, &language)
 		}
 	})
 	for i, language := range response {
@@ -121,7 +121,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Langu
 					Name:          bookName,
 					ChaptersCount: chaptersCount,
 				}
-				version.Books = append(version.Books, book)
+				version.Books = append(version.Books, &book)
 			})
 			doc.Find("tr.nt-book > td.book-name").Each(func(i int, s *goquery.Selection) {
 				chaptersCount, err := strconv.Atoi(s.Children().Last().Text())
@@ -135,7 +135,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Langu
 					Name:          bookName,
 					ChaptersCount: chaptersCount,
 				}
-				version.Books = append(version.Books, book)
+				version.Books = append(version.Books, &book)
 			})
 			language.Versions[j] = version
 		}
@@ -205,7 +205,7 @@ func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Langu
 						verseBody = strings.TrimSpace(verseBody)
 						book.Verses = append(
 							book.Verses,
-							verseModel.Verse{
+							&verseModel.Verse{
 								Chapter: chapterNumber,
 								Number:  verseNumber,
 								Body:    verseBody,

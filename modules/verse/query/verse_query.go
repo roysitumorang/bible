@@ -124,7 +124,7 @@ func (q *verseQuery) FindVerses(ctx context.Context, filter *verseModel.Filter) 
 	return
 }
 
-func (q *verseQuery) SaveVerse(ctx context.Context, tx pgx.Tx, request verseModel.Verse) (err error) {
+func (q *verseQuery) SaveVerse(ctx context.Context, tx pgx.Tx, request *verseModel.Verse) (err error) {
 	ctxt := "VerseQuery-SaveVerse"
 	verseID, verseUID := helper.GenerateUniqueID()
 	if _, err = tx.Exec(

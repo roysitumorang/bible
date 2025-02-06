@@ -10,6 +10,6 @@ import (
 type (
 	LanguageQuery interface {
 		FindLanguages(ctx context.Context) (response []languageModel.Language, err error)
-		SaveLanguage(ctx context.Context, tx pgx.Tx, request languageModel.Language) (response string, err error)
+		SaveLanguage(ctx context.Context, tx pgx.Tx, request *languageModel.Language) (response string, err error)
 	}
 )

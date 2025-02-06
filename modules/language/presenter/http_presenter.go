@@ -55,7 +55,7 @@ func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
 		return languageModel.NewResponseLanguages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
-	mapLanguageVersions := map[string][]versionModel.Version{}
+	mapLanguageVersions := map[string][]*versionModel.Version{}
 	for _, version := range versions {
 		mapLanguageVersions[version.LanguageUID] = append(mapLanguageVersions[version.LanguageUID], version)
 	}

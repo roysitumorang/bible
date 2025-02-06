@@ -18,10 +18,10 @@ type (
 		// example: English
 		Name string `json:"name"`
 		// example: EN
-		Code      string                 `json:"code"`
-		CreatedAt time.Time              `json:"-"`
-		UpdatedAt time.Time              `json:"-"`
-		Versions  []versionModel.Version `json:"versions"`
+		Code      string                  `json:"code"`
+		CreatedAt time.Time               `json:"-"`
+		UpdatedAt time.Time               `json:"-"`
+		Versions  []*versionModel.Version `json:"versions"`
 	}
 
 	// swagger:model ResponseLanguages

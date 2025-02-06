@@ -32,9 +32,9 @@ func New(
 	}
 }
 
-func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (response []bookModel.Book, err error) {
+func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (response []*bookModel.Book, err error) {
 	ctxt := "BookQuery-FindBooks"
-	response = make([]bookModel.Book, 0)
+	response = make([]*bookModel.Book, 0)
 	if filter == nil {
 		return
 	}
@@ -78,7 +78,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 	if count == 0 {
 		return
 	}
-	response = make([]bookModel.Book, count)
+	response = make([]*bookModel.Book, count)
 	query = strings.ReplaceAll(
 		query,
 		"COUNT(1)",
@@ -147,7 +147,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 	return
 }
 
-func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.Book) (response string, err error) {
+func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request *bookModel.Book) (response string, err error) {
 	ctxt := "BookQuery-SaveBook"
 	bookID, bookUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(

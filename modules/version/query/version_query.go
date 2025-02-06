@@ -30,9 +30,9 @@ func New(
 	}
 }
 
-func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Filter) (response []versionModel.Version, err error) {
+func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Filter) (response []*versionModel.Version, err error) {
 	ctxt := "VersionQuery-FindVersions"
-	response = make([]versionModel.Version, 0)
+	response = make([]*versionModel.Version, 0)
 	query := "SELECT COUNT(1) FROM versions"
 	var params []interface{}
 	if filter != nil {
@@ -55,7 +55,7 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 	if count == 0 {
 		return
 	}
-	response = make([]versionModel.Version, count)
+	response = make([]*versionModel.Version, count)
 	query = strings.ReplaceAll(
 		query,
 		"COUNT(1)",
@@ -100,7 +100,7 @@ func (q *versionQuery) FindVersions(ctx context.Context, filter *versionModel.Fi
 	return
 }
 
-func (q *versionQuery) SaveVersion(ctx context.Context, tx pgx.Tx, request versionModel.Version) (response string, err error) {
+func (q *versionQuery) SaveVersion(ctx context.Context, tx pgx.Tx, request *versionModel.Version) (response string, err error) {
 	ctxt := "VersionQuery-SaveVersion"
 	versionID, versionUID := helper.GenerateUniqueID()
 	if err = tx.QueryRow(

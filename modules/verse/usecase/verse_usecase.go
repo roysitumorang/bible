@@ -279,9 +279,9 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrWait")
 		return
 	}
-	var languages []languageModel.Language
+	var languages []*languageModel.Language
 	mapLanguages.Range(func(_, value any) bool {
-		languages = append(languages, value.(languageModel.Language))
+		languages = append(languages, value.(*languageModel.Language))
 		return true
 	})
 	tx, err := q.verseQuery.BeginTx(ctx)

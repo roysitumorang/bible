@@ -27,10 +27,10 @@ type (
 		// example: KJ21
 		Code string `json:"code"`
 		// example: 21st-Century-King-James-Version-KJ21-Bible
-		Slug      string           `json:"slug"`
-		CreatedAt time.Time        `json:"-"`
-		UpdatedAt time.Time        `json:"-"`
-		Books     []bookModel.Book `json:"books,omitempty"`
+		Slug      string            `json:"slug"`
+		CreatedAt time.Time         `json:"-"`
+		UpdatedAt time.Time         `json:"-"`
+		Books     []*bookModel.Book `json:"books,omitempty"`
 	}
 
 	// swagger:model ResponseVersion

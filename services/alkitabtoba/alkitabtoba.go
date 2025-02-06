@@ -31,7 +31,7 @@ func New() *AlkitabToba {
 	return &AlkitabToba{}
 }
 
-func (q *AlkitabToba) Sync(ctx context.Context) (response []languageModel.Language, err error) {
+func (q *AlkitabToba) Sync(ctx context.Context) (response []*languageModel.Language, err error) {
 	ctxt := "AlkitabToba-Sync"
 	statusCode, body, err := fasthttp.Get(nil, baseURL)
 	if err != nil {
@@ -46,11 +46,11 @@ func (q *AlkitabToba) Sync(ctx context.Context) (response []languageModel.Langua
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrNewDocumentFromReader")
 		return
 	}
-	response = []languageModel.Language{
+	response = []*languageModel.Language{
 		{
 			Name: "Bahasa Batak Toba",
 			Code: "BBC",
-			Versions: []versionModel.Version{
+			Versions: []*versionModel.Version{
 				{
 					Name: "Bahasa Batak Toba",
 					Code: "BBC",
@@ -73,7 +73,7 @@ func (q *AlkitabToba) Sync(ctx context.Context) (response []languageModel.Langua
 		bookName := s.Text()
 		response[0].Versions[0].Books = append(
 			response[0].Versions[0].Books,
-			bookModel.Book{
+			&bookModel.Book{
 				Testament: testament,
 				Name:      bookName,
 				Slug:      href,
@@ -126,7 +126,7 @@ func (q *AlkitabToba) Sync(ctx context.Context) (response []languageModel.Langua
 				verseBody = strings.TrimPrefix(verseBody, matches[0])
 				book.Verses = append(
 					book.Verses,
-					verseModel.Verse{
+					&verseModel.Verse{
 						Body:    verseBody,
 						Chapter: chapterNumber,
 						Number:  verseNumber,

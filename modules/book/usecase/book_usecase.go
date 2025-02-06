@@ -23,7 +23,7 @@ func New(
 	}
 }
 
-func (q *bookUseCase) FindBooks(ctx context.Context, filter *bookModel.Filter) (response []bookModel.Book, err error) {
+func (q *bookUseCase) FindBooks(ctx context.Context, filter *bookModel.Filter) (response []*bookModel.Book, err error) {
 	ctxt := "BookUseCase-FindBooks"
 	if response, err = q.bookQuery.FindBooks(ctx, filter); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")

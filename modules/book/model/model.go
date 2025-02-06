@@ -22,13 +22,13 @@ type (
 		Testament  string `json:"-"`
 		VersionUID string `json:"-"`
 		// example: Genesis
-		Name          string             `json:"name"`
-		Slug          string             `json:"-"`
-		ChaptersCount int                `json:"-"`
-		CreatedAt     time.Time          `json:"-"`
-		UpdatedAt     time.Time          `json:"-"`
-		Chapters      []Chapter          `json:"chapters"`
-		Verses        []verseModel.Verse `json:"-"`
+		Name          string              `json:"name"`
+		Slug          string              `json:"-"`
+		ChaptersCount int                 `json:"-"`
+		CreatedAt     time.Time           `json:"-"`
+		UpdatedAt     time.Time           `json:"-"`
+		Chapters      []Chapter           `json:"chapters"`
+		Verses        []*verseModel.Verse `json:"-"`
 	}
 
 	Chapter struct {

@@ -9,7 +9,7 @@ import (
 
 type (
 	BookQuery interface {
-		FindBooks(ctx context.Context, filter *bookModel.Filter) (response []bookModel.Book, err error)
-		SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.Book) (response string, err error)
+		FindBooks(ctx context.Context, filter *bookModel.Filter) (response []*bookModel.Book, err error)
+		SaveBook(ctx context.Context, tx pgx.Tx, request *bookModel.Book) (response string, err error)
 	}
 )
