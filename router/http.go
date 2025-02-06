@@ -45,7 +45,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 			if errors.As(err, &e) {
 				code = e.Code
 			}
-			return helper.NewResponse(code, err.Error(), nil).WriteResponse(ctx)
+			return helper.NewResponse(ctx, code, err.Error()).WriteResponse(ctx, nil)
 		},
 	})
 	app.Use(
@@ -76,17 +76,13 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 	versionPresenter.New(q.VersionUseCase, q.BookUseCase).Mount(v1.Group("/versions"))
 	versePresenter.New(q.BookUseCase, q.VerseUseCase).Mount(v1.Group("/verses"))
 	v1.Get("/ping", func(c *fiber.Ctx) error {
-		return helper.NewResponse(
-			fiber.StatusOK,
-			"",
-			map[string]interface{}{
-				"version": config.Version,
-				"commit":  config.Commit,
-				"build":   config.Build,
-				"upsince": config.Now.Format(time.RFC3339),
-				"uptime":  time.Since(config.Now).String(),
-			},
-		).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusOK, "").WriteResponse(c, map[string]interface{}{
+			"version": config.Version,
+			"commit":  config.Commit,
+			"build":   config.Build,
+			"upsince": config.Now.Format(time.RFC3339),
+			"uptime":  time.Since(config.Now).String(),
+		})
 	})
 	v1.Use(middleware.BasicAuth()).
 		Get("/metrics", monitor.New(monitor.Config{
@@ -96,13 +92,13 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 			envMap, err := godotenv.Read(".env")
 			if err != nil {
 				helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrRead")
-				return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+				return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 			}
 			envMap["GO_VERSION"] = runtime.Version()
-			return helper.NewResponse(fiber.StatusOK, "", envMap).WriteResponse(c)
+			return helper.NewResponse(c, fiber.StatusOK, "").WriteResponse(c, envMap)
 		})
 	app.Use(func(c *fiber.Ctx) error {
-		return helper.NewResponse(fiber.StatusNotFound, "", nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusNotFound, "").WriteResponse(c, nil)
 	})
 	port := DefaultPort
 	if envPort, ok := os.LookupEnv("PORT"); ok && envPort != "" {

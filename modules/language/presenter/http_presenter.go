@@ -3,6 +3,7 @@ package presenter
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/roysitumorang/bible/helper"
+	languageModel "github.com/roysitumorang/bible/modules/language/model"
 	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
 	versionModel "github.com/roysitumorang/bible/modules/version/model"
 	versionUseCase "github.com/roysitumorang/bible/modules/version/usecase"
@@ -30,18 +31,29 @@ func (q *languageHTTPHandler) Mount(r fiber.Router) {
 	r.Get("", q.FindLanguages)
 }
 
+// swagger:operation GET /languages Language FindLanguages
+// Get languages
+// ---
+// produces:
+//   - "application/json"
+// parameters:
+// responses:
+//   200:
+//     description: "successful operation"
+//     schema:
+//       $ref: "#/definitions/ResponseLanguages"
 func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "LanguagePresenter-FindLanguages"
 	languages, err := q.languageUseCase.FindLanguages(ctx)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindLanguages")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
 	versions, err := q.versionUseCase.FindVersions(ctx, nil)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
 	mapLanguageVersions := map[string][]versionModel.Version{}
 	for _, version := range versions {
@@ -53,5 +65,10 @@ func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 		}
 		languages[i] = language
 	}
-	return helper.NewResponse(fiber.StatusOK, "", languages).WriteResponse(c)
+	r := helper.NewResponse(c, fiber.StatusOK, "")
+	response := languageModel.ResponseLanguages{
+		Response: r,
+		Data:     languages,
+	}
+	return r.WriteResponse(c, response)
 }

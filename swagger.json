@@ -1,0 +1,479 @@
+{
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Bible API",
+    "version": "0.1.0"
+  },
+  "basePath": "/v1",
+  "paths": {
+    "/languages": {
+      "get": {
+        "description": "Get languages",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Language"
+        ],
+        "operationId": "FindLanguages",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResponseLanguages"
+            }
+          }
+        }
+      }
+    },
+    "/verses": {
+      "get": {
+        "description": "Get verses",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Verse"
+        ],
+        "operationId": "FindVerses",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "version",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "q",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResponsePassages"
+            }
+          }
+        }
+      }
+    },
+    "/versions/{versionUid}": {
+      "get": {
+        "description": "Get version by UID",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Version"
+        ],
+        "operationId": "FindVersion",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "versionUid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResponseVersion"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Book": {
+      "type": "object",
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Chapter"
+          },
+          "x-go-name": "Chapters"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "UID",
+          "example": "0194d944-2959-77d5-a69e-a0ffb9fa3f5b"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "Genesis"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/book/model"
+    },
+    "Chapter": {
+      "type": "object",
+      "properties": {
+        "link": {
+          "type": "string",
+          "x-go-name": "Link",
+          "example": "http://localhost:18000/v1/verses?q=Genesis+1\u0026version=KJ21"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Number",
+          "example": 1
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/book/model"
+    },
+    "Language": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "x-go-name": "Code",
+          "example": "EN"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "UID",
+          "example": "0194d944-2954-7a1a-97f4-707afa02238b"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "English"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Version"
+          },
+          "x-go-name": "Versions"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/language/model"
+    },
+    "Passage": {
+      "type": "object",
+      "properties": {
+        "book": {
+          "type": "string",
+          "x-go-name": "BookName"
+        },
+        "chapter": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Chapter"
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Chapter"
+          },
+          "x-go-name": "Chapters"
+        },
+        "verse_end": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VerseNoEnd"
+        },
+        "verse_start": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VerseNoStart"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string",
+          "x-go-name": "App",
+          "example": "bible"
+        },
+        "data": {
+          "x-go-name": "Data"
+        },
+        "latency": {
+          "type": "string",
+          "x-go-name": "Latency",
+          "example": "6.029109ms"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "request_id": {
+          "type": "string",
+          "x-go-name": "RequestID",
+          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+        },
+        "request_url": {
+          "type": "string",
+          "x-go-name": "RequestURL",
+          "example": "\"GET http://localhost:18000/v1/languages\""
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "OK"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusCode",
+          "example": 200
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T09:07:00.509782488+07:00"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/helper"
+    },
+    "ResponseLanguages": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string",
+          "x-go-name": "App",
+          "example": "bible"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Language"
+          },
+          "x-go-name": "Data"
+        },
+        "latency": {
+          "type": "string",
+          "x-go-name": "Latency",
+          "example": "6.029109ms"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "request_id": {
+          "type": "string",
+          "x-go-name": "RequestID",
+          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+        },
+        "request_url": {
+          "type": "string",
+          "x-go-name": "RequestURL",
+          "example": "\"GET http://localhost:18000/v1/languages\""
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "OK"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusCode",
+          "example": 200
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T09:07:00.509782488+07:00"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/language/model"
+    },
+    "ResponsePassages": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string",
+          "x-go-name": "App",
+          "example": "bible"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Passage"
+          },
+          "x-go-name": "Data"
+        },
+        "latency": {
+          "type": "string",
+          "x-go-name": "Latency",
+          "example": "6.029109ms"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "request_id": {
+          "type": "string",
+          "x-go-name": "RequestID",
+          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+        },
+        "request_url": {
+          "type": "string",
+          "x-go-name": "RequestURL",
+          "example": "\"GET http://localhost:18000/v1/languages\""
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "OK"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusCode",
+          "example": 200
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T09:07:00.509782488+07:00"
+        }
+      },
+      "x-go-name": "ReponsePassages",
+      "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
+    },
+    "ResponseVersion": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string",
+          "x-go-name": "App",
+          "example": "bible"
+        },
+        "data": {
+          "x-go-name": "Data",
+          "$ref": "#/definitions/Version"
+        },
+        "latency": {
+          "type": "string",
+          "x-go-name": "Latency",
+          "example": "6.029109ms"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "request_id": {
+          "type": "string",
+          "x-go-name": "RequestID",
+          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+        },
+        "request_url": {
+          "type": "string",
+          "x-go-name": "RequestURL",
+          "example": "\"GET http://localhost:18000/v1/languages\""
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "OK"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusCode",
+          "example": 200
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp",
+          "example": "2025-02-06T09:07:00.509782488+07:00"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/version/model"
+    },
+    "Verse": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-go-name": "Body",
+          "example": "In the beginning God created the heaven and the earth."
+        },
+        "book": {
+          "type": "string",
+          "x-go-name": "BookName"
+        },
+        "chapter_no": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Chapter"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "UID",
+          "example": "0194b25b-bb70-7385-a6c4-bd4a748b7064"
+        },
+        "verse_no": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Number",
+          "example": 1
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "VersionCode"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
+    },
+    "Version": {
+      "type": "object",
+      "properties": {
+        "books": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Book"
+          },
+          "x-go-name": "Books"
+        },
+        "code": {
+          "type": "string",
+          "x-go-name": "Code",
+          "example": "KJ21"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "UID",
+          "example": "0194d944-2957-7215-8f15-2b12282fa896"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "21st Century King James Version"
+        },
+        "slug": {
+          "type": "string",
+          "x-go-name": "Slug",
+          "example": "21st-Century-King-James-Version-KJ21-Bible"
+        }
+      },
+      "x-go-package": "github.com/roysitumorang/bible/modules/version/model"
+    }
+  }
+}

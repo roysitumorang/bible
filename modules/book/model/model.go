@@ -16,10 +16,12 @@ type (
 	FilterOption func(q *Filter)
 
 	Book struct {
-		ID            int64              `json:"-"`
-		UID           string             `json:"id"`
-		Testament     string             `json:"-"`
-		VersionUID    string             `json:"-"`
+		ID int64 `json:"-"`
+		// example: 0194d944-2959-77d5-a69e-a0ffb9fa3f5b
+		UID        string `json:"id"`
+		Testament  string `json:"-"`
+		VersionUID string `json:"-"`
+		// example: Genesis
 		Name          string             `json:"name"`
 		Slug          string             `json:"-"`
 		ChaptersCount int                `json:"-"`
@@ -30,8 +32,10 @@ type (
 	}
 
 	Chapter struct {
-		Number int    `json:"number"`
-		Link   string `json:"link"`
+		// example: 1
+		Number int `json:"number"`
+		// example: http://localhost:18000/v1/verses?q=Genesis+1&version=KJ21
+		Link string `json:"link"`
 	}
 )
 

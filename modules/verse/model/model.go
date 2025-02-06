@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"github.com/roysitumorang/bible/helper"
 )
 
 type (
@@ -14,16 +16,20 @@ type (
 
 	Book struct {
 		Name string
-		ChapterStart,
-		ChapterEnd int
+		Chapter,
+		VerseNoStart,
+		VerseNoEnd int
 	}
 
 	Verse struct {
-		ID          int64     `json:"-"`
-		UID         string    `json:"id"`
-		BookUID     string    `json:"-"`
-		Chapter     int       `json:"chapter_no,omitempty"`
-		Number      int       `json:"verse_no"`
+		ID int64 `json:"-"`
+		// example: 0194b25b-bb70-7385-a6c4-bd4a748b7064
+		UID     string `json:"id"`
+		BookUID string `json:"-"`
+		Chapter int    `json:"chapter_no,omitempty"`
+		// example: 1
+		Number int `json:"verse_no"`
+		// example: In the beginning God created the heaven and the earth.
 		Body        string    `json:"body"`
 		CreatedAt   time.Time `json:"-"`
 		UpdatedAt   time.Time `json:"-"`
@@ -32,15 +38,23 @@ type (
 	}
 
 	Chapter struct {
+		// example: 1
 		Number int     `json:"number"`
 		Verses []Verse `json:"verses"`
 	}
 
 	Passage struct {
 		BookName     string    `json:"book"`
-		ChapterStart int       `json:"chapter_start"`
-		ChapterEnd   int       `json:"chapter_end"`
+		Chapter      int       `json:"chapter"`
+		VerseNoStart int       `json:"verse_start"`
+		VerseNoEnd   int       `json:"verse_end"`
 		Chapters     []Chapter `json:"chapters"`
+	}
+
+	// swagger:model ResponsePassages
+	ReponsePassages struct {
+		*helper.Response
+		Data []Passage `json:"data"`
 	}
 )
 
@@ -58,14 +72,15 @@ func WithVersionCode(versionCode string) FilterOption {
 	}
 }
 
-func WithBook(name string, chapterStart, chapterEnd int) FilterOption {
+func WithBook(name string, chapter, verseNoStart, verseNoEnd int) FilterOption {
 	return func(q *Filter) {
 		q.Books = append(
 			q.Books,
 			Book{
 				Name:         name,
-				ChapterStart: chapterStart,
-				ChapterEnd:   chapterEnd,
+				Chapter:      chapter,
+				VerseNoStart: verseNoStart,
+				VerseNoEnd:   verseNoEnd,
 			},
 		)
 	}

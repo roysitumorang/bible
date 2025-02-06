@@ -16,3 +16,6 @@ run: build stop
 
 stop:
 	@-lsof -t -i :$(PORT_HTTP) | xargs --no-run-if-empty kill
+
+doc:
+	@rm -f ./swagger.json && swagger generate spec -o ./swagger.json --scan-models

@@ -33,6 +33,21 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 	r.Get("/:uid", q.FindVersion)
 }
 
+// swagger:operation GET /versions/{versionUid} Version FindVersion
+// Get version by UID
+// ---
+// produces:
+//   - "application/json"
+// parameters:
+//   - name: versionUid
+//     in: path
+//     required: true
+//     type: string
+// responses:
+//   200:
+//     description: "successful operation"
+//     schema:
+//       $ref: "#/definitions/ResponseVersion"
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "VersionPresenter-FindVersion"
@@ -44,21 +59,26 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	versions, err := q.versionUseCase.FindVersions(ctx, filter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
 	if len(versions) == 0 {
-		return helper.NewResponse(fiber.StatusNotFound, "version not found", nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusNotFound, "version not found").WriteResponse(c, nil)
 	}
-	response := versions[0]
-	if response.Books, err = q.bookUseCase.FindBooks(
+	version := versions[0]
+	if version.Books, err = q.bookUseCase.FindBooks(
 		ctx,
 		bookModel.NewFilter(
-			bookModel.WithVersionUID(response.UID),
+			bookModel.WithVersionUID(version.UID),
 			bookModel.WithPaginationURL(paginationURL),
 		),
 	); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
-	return helper.NewResponse(fiber.StatusOK, "", response).WriteResponse(c)
+	r := helper.NewResponse(c, fiber.StatusOK, "")
+	response := versionModel.ResponseVersion{
+		Response: r,
+		Data:     version,
+	}
+	return r.WriteResponse(c, response)
 }

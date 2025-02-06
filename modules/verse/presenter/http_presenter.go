@@ -32,13 +32,32 @@ func (q *verseHTTPHandler) Mount(r fiber.Router) {
 	r.Get("", q.FindVerses)
 }
 
+// swagger:operation GET /verses Verse FindVerses
+// Get verses
+// ---
+// produces:
+//   - "application/json"
+// parameters:
+//   - name: version
+//     in: query
+//     required: true
+//     type: string
+//   - name: q
+//     in: query
+//     required: true
+//     type: string
+// responses:
+//   200:
+//     description: "successful operation"
+//     schema:
+//       $ref: "#/definitions/ResponsePassages"
 func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "VersePresenter-FindVerses"
 	versesFilter, err := sanitizer.FindVerses(ctx, c)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
 	mapBookChaptersCount := map[string]int{}
 	if n := len(versesFilter.Books); n > 0 {
@@ -49,7 +68,7 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		books, err := q.bookUseCase.FindBooks(ctx, bookModel.NewFilter(bookModel.WithNames(bookNames...)))
 		if err != nil {
 			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
-			return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+			return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 		}
 		for _, book := range books {
 			mapBookChaptersCount[book.Name] = book.ChaptersCount
@@ -58,7 +77,7 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	verses, err := q.verseUseCase.SearchVerses(ctx, versesFilter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearchVerses")
-		return helper.NewResponse(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
+		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
 	}
 	mapBookChapterVerses := map[string]map[int][]verseModel.Verse{}
 	for _, verse := range verses {
@@ -67,19 +86,19 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		}
 		mapBookChapterVerses[verse.BookName][verse.Chapter] = append(mapBookChapterVerses[verse.BookName][verse.Chapter], verse.Doc())
 	}
-	response := make([]verseModel.Passage, len(versesFilter.Books))
+	passages := make([]verseModel.Passage, len(versesFilter.Books))
 	for i, book := range versesFilter.Books {
 		chaptersCount, ok := mapBookChaptersCount[book.Name]
 		if !ok {
 			continue
 		}
-		chapterEnd := book.ChapterStart
-		if book.ChapterEnd > 0 {
-			chapterEnd = min(book.ChapterEnd, chaptersCount)
+		verseNoEnd := book.VerseNoStart
+		if book.VerseNoEnd > 0 {
+			verseNoEnd = min(book.VerseNoEnd, chaptersCount)
 		}
 		var k int
-		chapters := make([]verseModel.Chapter, chapterEnd-book.ChapterStart+1)
-		for j := book.ChapterStart; j <= chapterEnd; j++ {
+		chapters := make([]verseModel.Chapter, verseNoEnd-book.VerseNoStart+1)
+		for j := book.VerseNoStart; j <= verseNoEnd; j++ {
 			verses, ok := mapBookChapterVerses[book.Name][j]
 			if !ok {
 				verses = []verseModel.Verse{}
@@ -90,12 +109,17 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 			}
 			k++
 		}
-		response[i] = verseModel.Passage{
+		passages[i] = verseModel.Passage{
 			BookName:     book.Name,
-			ChapterStart: book.ChapterStart,
-			ChapterEnd:   book.ChapterEnd,
+			VerseNoStart: book.VerseNoStart,
+			VerseNoEnd:   book.VerseNoEnd,
 			Chapters:     chapters,
 		}
 	}
-	return helper.NewResponse(fiber.StatusOK, "", response).WriteResponse(c)
+	r := helper.NewResponse(c, fiber.StatusOK, "")
+	response := verseModel.ReponsePassages{
+		Response: r,
+		Data:     passages,
+	}
+	return r.WriteResponse(c, response)
 }

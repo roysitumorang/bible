@@ -96,16 +96,21 @@ func (q *verseUseCase) SearchVerses(ctx context.Context, filter *verseModel.Filt
 						"book": {Query: book.Name},
 					},
 				},
+				{
+					Match: map[string]types.MatchQuery{
+						"chapter_no": {Query: strconv.Itoa(book.Chapter)},
+					},
+				},
 			},
 		}
-		if book.ChapterEnd > book.ChapterStart {
-			chapterStart := types.Float64(book.ChapterStart)
-			chapterEnd := types.Float64(book.ChapterEnd)
+		if book.VerseNoEnd > book.VerseNoStart {
+			chapterStart := types.Float64(book.VerseNoStart)
+			chapterEnd := types.Float64(book.VerseNoEnd)
 			query.Bool.Should[i].Bool.Must = append(
 				query.Bool.Should[i].Bool.Must,
 				types.Query{
 					Range: map[string]types.RangeQuery{
-						"chapter_no": types.NumberRangeQuery{
+						"verse_no": types.NumberRangeQuery{
 							Gte: &chapterStart,
 							Lte: &chapterEnd,
 						},
@@ -117,7 +122,7 @@ func (q *verseUseCase) SearchVerses(ctx context.Context, filter *verseModel.Filt
 				query.Bool.Should[i].Bool.Must,
 				types.Query{
 					Match: map[string]types.MatchQuery{
-						"chapter_no": {Query: strconv.Itoa(book.ChapterStart)},
+						"verse_no": {Query: strconv.Itoa(book.VerseNoStart)},
 					},
 				},
 			)

@@ -1,3 +1,12 @@
+// Bible API
+//  version: 0.1.0
+//  title: Bible API
+// schemes: http, https
+// host:
+// basePath: /v1
+// produces:
+// - application/json
+// swagger:meta
 package main
 
 import (
