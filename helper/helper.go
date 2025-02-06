@@ -65,6 +65,9 @@ var (
 		if env, ok = os.LookupEnv("ENV"); !ok {
 			return errors.New("env ENV is required")
 		}
+		if env == "" {
+			env = "development"
+		}
 		if elasticUsername, ok = os.LookupEnv("ELASTIC_USERNAME"); !ok || elasticUsername == "" {
 			return errors.New("env ELASTIC_USERNAME is required")
 		}

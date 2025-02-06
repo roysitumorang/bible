@@ -18,7 +18,7 @@ type (
 	Book struct {
 		ID            int64              `json:"-"`
 		UID           string             `json:"id"`
-		TestamentUID  string             `json:"-"`
+		Testament     string             `json:"-"`
 		VersionUID    string             `json:"-"`
 		Name          string             `json:"name"`
 		Slug          string             `json:"-"`

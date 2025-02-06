@@ -39,7 +39,6 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrInitHelper")
 				return
 			}
-			var g errgroup.Group
 			service, err := router.MakeHandler(ctx)
 			if err != nil {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMakeHandler")
@@ -49,6 +48,7 @@ func main() {
 				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrMigrate")
 				return
 			}
+			var g errgroup.Group
 			g.Go(func() error {
 				return service.HTTPServerMain(ctx)
 			})

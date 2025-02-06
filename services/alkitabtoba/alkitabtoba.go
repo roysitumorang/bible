@@ -10,9 +10,9 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/roysitumorang/bible/helper"
+	"github.com/roysitumorang/bible/models"
 	bookModel "github.com/roysitumorang/bible/modules/book/model"
 	languageModel "github.com/roysitumorang/bible/modules/language/model"
-	testamentModel "github.com/roysitumorang/bible/modules/testament/model"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	versionModel "github.com/roysitumorang/bible/modules/version/model"
 	"github.com/valyala/fasthttp"
@@ -31,17 +31,8 @@ func New() *AlkitabToba {
 	return &AlkitabToba{}
 }
 
-func (q *AlkitabToba) Sync(ctx context.Context, testaments []testamentModel.Testament) (response []languageModel.Language, err error) {
+func (q *AlkitabToba) Sync(ctx context.Context) (response []languageModel.Language, err error) {
 	ctxt := "AlkitabToba-Sync"
-	var oldTestamentUID, newTestamentUID string
-	for _, testament := range testaments {
-		switch testament.Code {
-		case "OT":
-			oldTestamentUID = testament.UID
-		case "NT":
-			newTestamentUID = testament.UID
-		}
-	}
 	statusCode, body, err := fasthttp.Get(nil, baseURL)
 	if err != nil {
 		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGet")
@@ -73,19 +64,19 @@ func (q *AlkitabToba) Sync(ctx context.Context, testaments []testamentModel.Test
 		if !ok {
 			return
 		}
-		var testamentUID string
+		var testament string
 		if strings.Contains(href, "1-padan-na-robi") {
-			testamentUID = oldTestamentUID
+			testament = models.OldTestament
 		} else if strings.Contains(href, "2-padan-na-imbaru") {
-			testamentUID = newTestamentUID
+			testament = models.NewTestament
 		}
 		bookName := s.Text()
 		response[0].Versions[0].Books = append(
 			response[0].Versions[0].Books,
 			bookModel.Book{
-				TestamentUID: testamentUID,
-				Name:         bookName,
-				Slug:         href,
+				Testament: testament,
+				Name:      bookName,
+				Slug:      href,
 			},
 		)
 	})

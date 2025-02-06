@@ -12,9 +12,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	strip "github.com/grokify/html-strip-tags-go"
 	"github.com/roysitumorang/bible/helper"
+	"github.com/roysitumorang/bible/models"
 	bookModel "github.com/roysitumorang/bible/modules/book/model"
 	languageModel "github.com/roysitumorang/bible/modules/language/model"
-	testamentModel "github.com/roysitumorang/bible/modules/testament/model"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	versionModel "github.com/roysitumorang/bible/modules/version/model"
 	"github.com/valyala/fasthttp"
@@ -33,17 +33,8 @@ func New() *BibleGateway {
 	return &BibleGateway{}
 }
 
-func (q *BibleGateway) Sync(ctx context.Context, testaments []testamentModel.Testament) (response []languageModel.Language, err error) {
+func (q *BibleGateway) Sync(ctx context.Context) (response []languageModel.Language, err error) {
 	ctxt := "BibleGateway-Sync"
-	var oldTestamentUID, newTestamentUID string
-	for _, testament := range testaments {
-		switch testament.Code {
-		case "OT":
-			oldTestamentUID = testament.UID
-		case "NT":
-			newTestamentUID = testament.UID
-		}
-	}
 	var builder strings.Builder
 	_, _ = builder.WriteString(baseURL)
 	_, _ = builder.WriteString("/versions/")
@@ -126,7 +117,7 @@ func (q *BibleGateway) Sync(ctx context.Context, testaments []testamentModel.Tes
 				}
 				bookName := strings.TrimSpace(s.Children().Nodes[1].NextSibling.Data)
 				book := bookModel.Book{
-					TestamentUID:  oldTestamentUID,
+					Testament:     models.OldTestament,
 					Name:          bookName,
 					ChaptersCount: chaptersCount,
 				}
@@ -140,7 +131,7 @@ func (q *BibleGateway) Sync(ctx context.Context, testaments []testamentModel.Tes
 				}
 				bookName := strings.TrimSpace(s.Children().Nodes[1].NextSibling.Data)
 				book := bookModel.Book{
-					TestamentUID:  newTestamentUID,
+					Testament:     models.NewTestament,
 					Name:          bookName,
 					ChaptersCount: chaptersCount,
 				}

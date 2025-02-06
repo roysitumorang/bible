@@ -11,7 +11,6 @@ import (
 	bookUseCase "github.com/roysitumorang/bible/modules/book/usecase"
 	languageQuery "github.com/roysitumorang/bible/modules/language/query"
 	languageUseCase "github.com/roysitumorang/bible/modules/language/usecase"
-	testamentQuery "github.com/roysitumorang/bible/modules/testament/query"
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
 	verseUseCase "github.com/roysitumorang/bible/modules/verse/usecase"
 	versionQuery "github.com/roysitumorang/bible/modules/version/query"
@@ -64,11 +63,10 @@ func MakeHandler(ctx context.Context) (*Service, error) {
 	versionQuery := versionQuery.New(dbRead, dbWrite)
 	bookQuery := bookQuery.New(dbRead, dbWrite)
 	verseQuery := verseQuery.New(dbRead, dbWrite)
-	testamentQuery := testamentQuery.New(dbRead, dbWrite)
 	languageUseCase := languageUseCase.New(languageQuery)
 	versionUseCase := versionUseCase.New(versionQuery)
 	bookUseCase := bookUseCase.New(bookQuery)
-	verseUseCase := verseUseCase.New(testamentQuery, languageQuery, versionQuery, bookQuery, verseQuery, elastic, helper.GetIndexPassage(), bibleGateway, alkitabToba)
+	verseUseCase := verseUseCase.New(languageQuery, versionQuery, bookQuery, verseQuery, elastic, helper.GetIndexPassage(), bibleGateway, alkitabToba)
 	return &Service{
 		Migration:       migration,
 		LanguageUseCase: languageUseCase,

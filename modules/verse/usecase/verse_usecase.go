@@ -18,7 +18,6 @@ import (
 	bookQuery "github.com/roysitumorang/bible/modules/book/query"
 	"github.com/roysitumorang/bible/modules/language/model"
 	languageQuery "github.com/roysitumorang/bible/modules/language/query"
-	testamentQuery "github.com/roysitumorang/bible/modules/testament/query"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
 	versionQuery "github.com/roysitumorang/bible/modules/version/query"
@@ -31,20 +30,18 @@ import (
 
 type (
 	verseUseCase struct {
-		testamentQuery testamentQuery.TestamentQuery
-		languageQuery  languageQuery.LanguageQuery
-		versionQuery   versionQuery.VersionQuery
-		bookQuery      bookQuery.BookQuery
-		verseQuery     verseQuery.VerseQuery
-		elastic        *elastic.Elastic
-		indexName      string
-		biblegateway   *biblegateway.BibleGateway
-		alkitabtoba    *alkitabtoba.AlkitabToba
+		languageQuery languageQuery.LanguageQuery
+		versionQuery  versionQuery.VersionQuery
+		bookQuery     bookQuery.BookQuery
+		verseQuery    verseQuery.VerseQuery
+		elastic       *elastic.Elastic
+		indexName     string
+		biblegateway  *biblegateway.BibleGateway
+		alkitabtoba   *alkitabtoba.AlkitabToba
 	}
 )
 
 func New(
-	testamentQuery testamentQuery.TestamentQuery,
 	languageQuery languageQuery.LanguageQuery,
 	versionQuery versionQuery.VersionQuery,
 	bookQuery bookQuery.BookQuery,
@@ -55,15 +52,14 @@ func New(
 	alkitabtoba *alkitabtoba.AlkitabToba,
 ) VerseUseCase {
 	return &verseUseCase{
-		testamentQuery: testamentQuery,
-		languageQuery:  languageQuery,
-		versionQuery:   versionQuery,
-		bookQuery:      bookQuery,
-		verseQuery:     verseQuery,
-		elastic:        elastic,
-		indexName:      indexName,
-		biblegateway:   biblegateway,
-		alkitabtoba:    alkitabtoba,
+		languageQuery: languageQuery,
+		versionQuery:  versionQuery,
+		bookQuery:     bookQuery,
+		verseQuery:    verseQuery,
+		elastic:       elastic,
+		indexName:     indexName,
+		biblegateway:  biblegateway,
+		alkitabtoba:   alkitabtoba,
 	}
 }
 
@@ -250,11 +246,6 @@ func (q *verseUseCase) DeleteIndex(ctx context.Context) (err error) {
 
 func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 	ctxt := "VerseUseCase-Sync"
-	testaments, err := q.testamentQuery.FindTestaments(ctx)
-	if err != nil {
-		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindTestaments")
-		return
-	}
 	wg := sync.WaitGroup{}
 	pool := &sync.Pool{
 		New: func() any {
@@ -264,7 +255,7 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		biblegatewayLanguages, err := q.biblegateway.Sync(ctx, testaments)
+		biblegatewayLanguages, err := q.biblegateway.Sync(ctx)
 		if err != nil {
 			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
 			return
@@ -275,7 +266,7 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 	}()
 	go func() {
 		defer wg.Done()
-		alkitabtobaLanguages, err := q.alkitabtoba.Sync(ctx, testaments)
+		alkitabtobaLanguages, err := q.alkitabtoba.Sync(ctx)
 		if err != nil {
 			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
 			return

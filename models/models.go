@@ -16,6 +16,11 @@ type (
 	}
 )
 
+const (
+	OldTestament = "OT"
+	NewTestament = "NT"
+)
+
 var (
 	MapPerPageRowsCount = map[int]int{1: 1, 10: 1, 25: 1, 50: 1, 100: 1}
 	PerPageRowsCount    = []int{1, 10, 25, 50, 100}

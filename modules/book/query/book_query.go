@@ -84,7 +84,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 		"COUNT(1)",
 		`b.id
 		, b.uid
-		, b.testament_uid
+		, b.testament
 		, b.version_uid
 		, b.name
 		, b.chapters_count
@@ -111,7 +111,7 @@ func (q *bookQuery) FindBooks(ctx context.Context, filter *bookModel.Filter) (re
 		if err = rows.Scan(
 			&book.ID,
 			&book.UID,
-			&book.TestamentUID,
+			&book.Testament,
 			&book.VersionUID,
 			&book.Name,
 			&book.ChaptersCount,
@@ -162,7 +162,7 @@ func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.B
 		`INSERT INTO books (
 			id
 			, uid
-			, testament_uid
+			, testament
 			, version_uid
 			, name
 			, chapters_count
@@ -170,13 +170,13 @@ func (q *bookQuery) SaveBook(ctx context.Context, tx pgx.Tx, request bookModel.B
 			, updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
 		ON CONFLICT (name, version_uid) DO UPDATE SET
-			testament_uid = $3
+			testament = $3
 			, chapters_count = $6
 			, updated_at = $7
 		RETURNING uid`,
 		bookID,
 		bookUID,
-		request.TestamentUID,
+		request.Testament,
 		request.VersionUID,
 		request.Name,
 		request.ChaptersCount,

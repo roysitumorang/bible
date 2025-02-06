@@ -2,7 +2,6 @@ package migration
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/roysitumorang/bible/helper"
@@ -40,63 +39,6 @@ func init() {
 		); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 			return
-		}
-		// testaments
-		if _, err = tx.Exec(
-			ctx,
-			`CREATE TABLE testaments (
-				id bigint NOT NULL PRIMARY KEY
-				, uid character varying NOT NULL UNIQUE
-				, name character varying NOT NULL
-				, code character varying NOT NULL
-				, created_at timestamp with time zone NOT NULL
-				, updated_at timestamp with time zone NOT NULL
-			);`,
-		); err != nil {
-			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
-			return
-		}
-		if _, err = tx.Exec(
-			ctx,
-			`CREATE INDEX ON testaments (name);`,
-		); err != nil {
-			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
-			return
-		}
-		if _, err = tx.Exec(
-			ctx,
-			`CREATE UNIQUE INDEX ON testaments (code);`,
-		); err != nil {
-			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
-			return
-		}
-		testaments := [][]string{{"Old", "OT"}, {"New", "NT"}}
-		for _, testament := range testaments {
-			testamentName, testamentCode := testament[0], testament[1]
-			testamentID, testamentUID, err := helper.GenerateUniqueID()
-			if err != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrGenerateUniqueID")
-				return err
-			}
-			if _, err = tx.Exec(
-				ctx,
-				`INSERT INTO testaments (
-					id
-					, uid
-					, name
-					, code
-					, created_at
-					, updated_at
-				) VALUES ($1, $2, $3, $4, $5, $5);`,
-				testamentID,
-				testamentUID,
-				testamentName,
-				testamentCode,
-				time.Now(),
-			); err != nil {
-				helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
-				return err
-			}
 		}
 		// versions
 		if _, err = tx.Exec(
@@ -149,7 +91,7 @@ func init() {
 			`CREATE TABLE books (
 				id bigint NOT NULL PRIMARY KEY
 				, uid character varying NOT NULL UNIQUE
-				, testament_uid character varying NOT NULL REFERENCES testaments (uid) ON UPDATE CASCADE ON DELETE CASCADE
+				, testament character varying NOT NULL
 				, version_uid character varying NOT NULL REFERENCES versions (uid) ON UPDATE CASCADE ON DELETE CASCADE
 				, name character varying NOT NULL
 				, chapters_count integer NOT NULL
@@ -162,7 +104,7 @@ func init() {
 		}
 		if _, err = tx.Exec(
 			ctx,
-			`CREATE INDEX ON books (testament_uid);`,
+			`CREATE INDEX ON books (testament);`,
 		); err != nil {
 			helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrExec")
 			return
