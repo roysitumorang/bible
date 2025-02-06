@@ -56,12 +56,12 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 	versesFilter, err := sanitizer.FindVerses(ctx, c)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVerses")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return verseModel.NewResponsePassages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	verses, err := q.verseUseCase.SearchVerses(ctx, versesFilter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSearchVerses")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return verseModel.NewResponsePassages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	mapBookChapterVerses := map[string]map[int][]verseModel.Verse{}
 	for _, verse := range verses {
@@ -92,10 +92,5 @@ func (q *verseHTTPHandler) FindVerses(c *fiber.Ctx) error {
 		}
 		passages[i] = passage
 	}
-	r := helper.NewResponse(c, fiber.StatusOK, "")
-	response := verseModel.ReponsePassages{
-		Response: r,
-		Data:     passages,
-	}
-	return r.WriteResponse(c, response)
+	return verseModel.NewResponsePassages(fiber.StatusOK, "", passages).WriteResponse(c)
 }

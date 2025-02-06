@@ -48,12 +48,12 @@ func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 	languages, err := q.languageUseCase.FindLanguages(ctx)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindLanguages")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return languageModel.NewResponseLanguages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	versions, err := q.versionUseCase.FindVersions(ctx, nil)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return languageModel.NewResponseLanguages(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	mapLanguageVersions := map[string][]versionModel.Version{}
 	for _, version := range versions {
@@ -65,10 +65,5 @@ func (q *languageHTTPHandler) FindLanguages(c *fiber.Ctx) error {
 		}
 		languages[i] = language
 	}
-	r := helper.NewResponse(c, fiber.StatusOK, "")
-	response := languageModel.ResponseLanguages{
-		Response: r,
-		Data:     languages,
-	}
-	return r.WriteResponse(c, response)
+	return languageModel.NewResponseLanguages(fiber.StatusOK, "", languages).WriteResponse(c)
 }

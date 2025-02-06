@@ -59,10 +59,10 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	versions, err := q.versionUseCase.FindVersions(ctx, filter)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindVersions")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return versionModel.NewResponseVersion(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
 	if len(versions) == 0 {
-		return helper.NewResponse(c, fiber.StatusNotFound, "version not found").WriteResponse(c, nil)
+		return versionModel.NewResponseVersion(fiber.StatusNotFound, "version not found", nil).WriteResponse(c)
 	}
 	version := versions[0]
 	if version.Books, err = q.bookUseCase.FindBooks(
@@ -73,12 +73,7 @@ func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 		),
 	); err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrFindBooks")
-		return helper.NewResponse(c, fiber.StatusBadRequest, err.Error()).WriteResponse(c, nil)
+		return versionModel.NewResponseVersion(fiber.StatusBadRequest, err.Error(), nil).WriteResponse(c)
 	}
-	r := helper.NewResponse(c, fiber.StatusOK, "")
-	response := versionModel.ResponseVersion{
-		Response: r,
-		Data:     version,
-	}
-	return r.WriteResponse(c, response)
+	return versionModel.NewResponseVersion(fiber.StatusOK, "", &version).WriteResponse(c)
 }

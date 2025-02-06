@@ -197,63 +197,12 @@
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
     },
-    "Response": {
-      "type": "object",
-      "properties": {
-        "app": {
-          "type": "string",
-          "x-go-name": "App",
-          "example": "bible"
-        },
-        "data": {
-          "x-go-name": "Data"
-        },
-        "latency": {
-          "type": "string",
-          "x-go-name": "Latency",
-          "example": "6.029109ms"
-        },
-        "message": {
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "request_id": {
-          "type": "string",
-          "x-go-name": "RequestID",
-          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
-        },
-        "request_url": {
-          "type": "string",
-          "x-go-name": "RequestURL",
-          "example": "\"GET http://localhost:18000/v1/languages\""
-        },
-        "status": {
-          "type": "string",
-          "x-go-name": "Status",
-          "example": "OK"
-        },
-        "status_code": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "StatusCode",
-          "example": 200
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "Timestamp",
-          "example": "2025-02-06T09:07:00.509782488+07:00"
-        }
-      },
-      "x-go-package": "github.com/roysitumorang/bible/helper"
-    },
     "ResponseLanguages": {
       "type": "object",
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App",
-          "example": "bible"
+          "x-go-name": "App"
         },
         "data": {
           "type": "array",
@@ -264,8 +213,7 @@
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency",
-          "example": "6.029109ms"
+          "x-go-name": "Latency"
         },
         "message": {
           "type": "string",
@@ -273,30 +221,25 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID",
-          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+          "x-go-name": "RequestID"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL",
-          "example": "\"GET http://localhost:18000/v1/languages\""
+          "x-go-name": "RequestURL"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status",
-          "example": "OK"
+          "x-go-name": "Status"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode",
-          "example": 200
+          "x-go-name": "StatusCode"
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp",
-          "example": "2025-02-06T09:07:00.509782488+07:00"
+          "x-go-name": "Timestamp"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/language/model"
@@ -306,8 +249,7 @@
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App",
-          "example": "bible"
+          "x-go-name": "App"
         },
         "data": {
           "type": "array",
@@ -318,8 +260,7 @@
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency",
-          "example": "6.029109ms"
+          "x-go-name": "Latency"
         },
         "message": {
           "type": "string",
@@ -327,33 +268,27 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID",
-          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+          "x-go-name": "RequestID"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL",
-          "example": "\"GET http://localhost:18000/v1/languages\""
+          "x-go-name": "RequestURL"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status",
-          "example": "OK"
+          "x-go-name": "Status"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode",
-          "example": 200
+          "x-go-name": "StatusCode"
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp",
-          "example": "2025-02-06T09:07:00.509782488+07:00"
+          "x-go-name": "Timestamp"
         }
       },
-      "x-go-name": "ReponsePassages",
       "x-go-package": "github.com/roysitumorang/bible/modules/verse/model"
     },
     "ResponseVersion": {
@@ -361,17 +296,14 @@
       "properties": {
         "app": {
           "type": "string",
-          "x-go-name": "App",
-          "example": "bible"
+          "x-go-name": "App"
         },
         "data": {
-          "x-go-name": "Data",
           "$ref": "#/definitions/Version"
         },
         "latency": {
           "type": "string",
-          "x-go-name": "Latency",
-          "example": "6.029109ms"
+          "x-go-name": "Latency"
         },
         "message": {
           "type": "string",
@@ -379,30 +311,25 @@
         },
         "request_id": {
           "type": "string",
-          "x-go-name": "RequestID",
-          "example": "edc014eb-514b-4b87-87f9-4f568de7025f"
+          "x-go-name": "RequestID"
         },
         "request_url": {
           "type": "string",
-          "x-go-name": "RequestURL",
-          "example": "\"GET http://localhost:18000/v1/languages\""
+          "x-go-name": "RequestURL"
         },
         "status": {
           "type": "string",
-          "x-go-name": "Status",
-          "example": "OK"
+          "x-go-name": "Status"
         },
         "status_code": {
           "type": "integer",
           "format": "int64",
-          "x-go-name": "StatusCode",
-          "example": 200
+          "x-go-name": "StatusCode"
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "x-go-name": "Timestamp",
-          "example": "2025-02-06T09:07:00.509782488+07:00"
+          "x-go-name": "Timestamp"
         }
       },
       "x-go-package": "github.com/roysitumorang/bible/modules/version/model"

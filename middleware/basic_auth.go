@@ -14,7 +14,7 @@ func BasicAuth() func(c *fiber.Ctx) error {
 			os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
 		},
 		Unauthorized: func(c *fiber.Ctx) error {
-			return helper.NewResponse(c, fiber.StatusUnauthorized, "Unauthorized").WriteResponse(c, nil)
+			return helper.NewResponse(fiber.StatusUnauthorized, "Unauthorized", nil).WriteResponse(c)
 		},
 	})
 }
