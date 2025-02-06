@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/roysitumorang/bible/helper"
 	bookQuery "github.com/roysitumorang/bible/modules/book/query"
-	"github.com/roysitumorang/bible/modules/language/model"
+	languageModel "github.com/roysitumorang/bible/modules/language/model"
 	languageQuery "github.com/roysitumorang/bible/modules/language/query"
 	verseModel "github.com/roysitumorang/bible/modules/verse/model"
 	verseQuery "github.com/roysitumorang/bible/modules/verse/query"
@@ -251,37 +251,39 @@ func (q *verseUseCase) DeleteIndex(ctx context.Context) (err error) {
 
 func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 	ctxt := "VerseUseCase-Sync"
-	wg := sync.WaitGroup{}
-	pool := &sync.Pool{
-		New: func() any {
-			return &[]model.Language{}
-		},
+	mapLanguages := sync.Map{}
+	var g errgroup.Group
+	g.Go(func() error {
+		languages, err := q.biblegateway.Sync(ctx)
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+			return err
+		}
+		for _, language := range languages {
+			mapLanguages.Store(language.Code, language)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		languages, err := q.alkitabtoba.Sync(ctx)
+		if err != nil {
+			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
+			return err
+		}
+		for _, language := range languages {
+			mapLanguages.Store(language.Code, language)
+		}
+		return nil
+	})
+	if err = g.Wait(); err != nil {
+		helper.Capture(ctx, zap.ErrorLevel, err, ctxt, "ErrWait")
+		return
 	}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		biblegatewayLanguages, err := q.biblegateway.Sync(ctx)
-		if err != nil {
-			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
-			return
-		}
-		buffer := pool.Get().(*[]model.Language)
-		*buffer = append(*buffer, biblegatewayLanguages...)
-		pool.Put(buffer)
-	}()
-	go func() {
-		defer wg.Done()
-		alkitabtobaLanguages, err := q.alkitabtoba.Sync(ctx)
-		if err != nil {
-			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSync")
-			return
-		}
-		buffer := pool.Get().(*[]model.Language)
-		*buffer = append(*buffer, alkitabtobaLanguages...)
-		pool.Put(buffer)
-	}()
-	wg.Wait()
-	languages := pool.Get().(*[]model.Language)
+	var languages []languageModel.Language
+	mapLanguages.Range(func(_, value any) bool {
+		languages = append(languages, value.(languageModel.Language))
+		return true
+	})
 	tx, err := q.verseQuery.BeginTx(ctx)
 	if err != nil {
 		helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrBeginTx")
@@ -296,7 +298,7 @@ func (q *verseUseCase) Sync(ctx context.Context) (err error) {
 			helper.Log(ctx, zap.ErrorLevel, errRollback.Error(), ctxt, "ErrRollback")
 		}
 	}()
-	for _, language := range *languages {
+	for _, language := range languages {
 		languageUID, err := q.languageQuery.SaveLanguage(ctx, tx, language)
 		if err != nil {
 			helper.Log(ctx, zap.ErrorLevel, err.Error(), ctxt, "ErrSaveLanguage")
