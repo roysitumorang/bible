@@ -40,8 +40,8 @@ func (q *versionHTTPHandler) Mount(r fiber.Router) {
 // @Accept			json
 // @Produce		json
 // @Param			uid	path		string	true	"Version UID"
-// @Success		200	{object}	model.ResponsePassages
-// @Router			/version/{uid} [get]
+// @Success		200	{object}	model.ResponseVersion
+// @Router			/versions/{uid} [get]
 func (q *versionHTTPHandler) FindVersion(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	ctxt := "VersionPresenter-FindVersion"

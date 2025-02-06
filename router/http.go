@@ -64,7 +64,7 @@ func (q *Service) HTTPServerMain(ctx context.Context) error {
 		cors.New(),
 	)
 	if helper.GetEnv() == "development" {
-		app.Get("/swagger/*", fiberSwagger.WrapHandler, middleware.BasicAuth())
+		app.Get("/swagger/*", fiberSwagger.WrapHandler)
 	}
 	v1 := app.Group("/v1")
 	languagePresenter.New(q.LanguageUseCase, q.VersionUseCase).Mount(v1.Group("/languages"))

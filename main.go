@@ -11,8 +11,10 @@
 //	@host
 //	@BasePath	/v1
 
-// @accept		json
-// @produce	json
+//	@accept		json
+//	@produce	json
+
+// @schemes	http https
 package main
 
 import (

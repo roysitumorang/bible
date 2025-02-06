@@ -92,7 +92,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/version/{uid}": {
+        "/versions/{uid}": {
             "get": {
                 "description": "finding version by UID",
                 "consumes": [
@@ -119,7 +119,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponsePassages"
+                            "$ref": "#/definitions/model.ResponseVersion"
                         }
                     }
                 }
@@ -295,6 +295,46 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ResponseVersion": {
+            "type": "object",
+            "properties": {
+                "app": {
+                    "type": "string",
+                    "example": "bible"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.Version"
+                },
+                "latency": {
+                    "type": "string",
+                    "example": "17.306935ms"
+                },
+                "message": {
+                    "type": "string",
+                    "example": ""
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "c6e430c5-21a5-45bf-aca2-36ae06c1a45d"
+                },
+                "request_url": {
+                    "type": "string",
+                    "example": "GET http://localhost:18000/v1/versions/07pz6q6q80c2r"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2025-02-06T16:49:47.815304721+07:00"
+                }
+            }
+        },
         "model.Verse": {
             "type": "object",
             "properties": {
@@ -359,7 +399,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "0.1.0",
 	Host:             "",
 	BasePath:         "/v1",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "Bible API",
 	Description:      "This is documentation of Bible API.",
 	InfoInstanceName: "swagger",

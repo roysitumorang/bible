@@ -5,6 +5,10 @@
     "produces": [
         "application/json"
     ],
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "This is documentation of Bible API.",
@@ -85,7 +89,7 @@
                 }
             }
         },
-        "/version/{uid}": {
+        "/versions/{uid}": {
             "get": {
                 "description": "finding version by UID",
                 "consumes": [
@@ -112,7 +116,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponsePassages"
+                            "$ref": "#/definitions/model.ResponseVersion"
                         }
                     }
                 }
@@ -285,6 +289,46 @@
                 "timestamp": {
                     "type": "string",
                     "example": "2025-02-06T16:52:34.01591064+07:00"
+                }
+            }
+        },
+        "model.ResponseVersion": {
+            "type": "object",
+            "properties": {
+                "app": {
+                    "type": "string",
+                    "example": "bible"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.Version"
+                },
+                "latency": {
+                    "type": "string",
+                    "example": "17.306935ms"
+                },
+                "message": {
+                    "type": "string",
+                    "example": ""
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "c6e430c5-21a5-45bf-aca2-36ae06c1a45d"
+                },
+                "request_url": {
+                    "type": "string",
+                    "example": "GET http://localhost:18000/v1/versions/07pz6q6q80c2r"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "OK"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2025-02-06T16:49:47.815304721+07:00"
                 }
             }
         },

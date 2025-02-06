@@ -121,6 +121,35 @@ definitions:
         example: "2025-02-06T16:52:34.01591064+07:00"
         type: string
     type: object
+  model.ResponseVersion:
+    properties:
+      app:
+        example: bible
+        type: string
+      data:
+        $ref: '#/definitions/model.Version'
+      latency:
+        example: 17.306935ms
+        type: string
+      message:
+        example: ""
+        type: string
+      request_id:
+        example: c6e430c5-21a5-45bf-aca2-36ae06c1a45d
+        type: string
+      request_url:
+        example: GET http://localhost:18000/v1/versions/07pz6q6q80c2r
+        type: string
+      status:
+        example: OK
+        type: string
+      status_code:
+        example: 200
+        type: integer
+      timestamp:
+        example: "2025-02-06T16:49:47.815304721+07:00"
+        type: string
+    type: object
   model.Verse:
     properties:
       body:
@@ -215,7 +244,7 @@ paths:
       summary: Finding verses
       tags:
       - Verse
-  /version/{uid}:
+  /versions/{uid}:
     get:
       consumes:
       - application/json
@@ -233,10 +262,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.ResponsePassages'
+            $ref: '#/definitions/model.ResponseVersion'
       summary: Finding version by UID
       tags:
       - Version
 produces:
 - application/json
+schemes:
+- http
+- https
 swagger: "2.0"
