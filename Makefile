@@ -20,3 +20,7 @@ stop:
 doc:
 	@echo Starting swagger generating
 	@swag fmt -d ./ --exclude ./docs && swag init -g *.go
+
+upgrade-dependencies:
+	@echo Upgrading dependencies
+	@go get -u ./... && go mod tidy
