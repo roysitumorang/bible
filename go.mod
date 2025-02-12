@@ -1,10 +1,10 @@
 module github.com/roysitumorang/bible
 
-go 1.23
+go 1.24
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/elastic/go-elasticsearch/v8 v8.17.0
+	github.com/elastic/go-elasticsearch/v8 v8.17.1
 	github.com/goccy/go-json v0.10.5
 	github.com/gofiber/contrib/fiberzap/v2 v2.1.5
 	github.com/gofiber/fiber/v2 v2.52.6
