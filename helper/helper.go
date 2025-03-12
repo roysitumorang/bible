@@ -11,7 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/vishal-bihani/go-tsid"
+	"github.com/rushysloth/go-tsid"
 )
 
 type (
